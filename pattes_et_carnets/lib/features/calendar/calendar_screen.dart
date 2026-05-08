@@ -8,6 +8,7 @@ import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 import 'package:pattes_et_carnets/shared/models/reminder_extensions.dart';
 import 'package:pattes_et_carnets/shared/providers/database_provider.dart';
+import 'package:pattes_et_carnets/shared/services/notification_service.dart';
 
 class CalendarScreen extends ConsumerWidget {
   const CalendarScreen({super.key});
@@ -61,12 +62,18 @@ class CalendarScreen extends ConsumerWidget {
                         child: _ReminderCard(
                           reminder: reminder,
                           catName: catMap[reminder.catId]?.name,
-                          onMarkDone: () => ref
-                              .read(remindersDaoProvider)
-                              .markDone(reminder.id),
-                          onDelete: () => ref
-                              .read(remindersDaoProvider)
-                              .deleteReminder(reminder.id),
+                          onMarkDone: () async {
+                            await ref
+                                .read(remindersDaoProvider)
+                                .markDone(reminder.id);
+                            await NotificationService.cancelReminder(reminder.id);
+                          },
+                          onDelete: () async {
+                            await ref
+                                .read(remindersDaoProvider)
+                                .deleteReminder(reminder.id);
+                            await NotificationService.cancelReminder(reminder.id);
+                          },
                         ),
                       );
                     },
@@ -402,15 +409,26 @@ class _AddReminderSheetState extends ConsumerState<_AddReminderSheet> {
     setState(() => _saving = true);
 
     final desc = _descController.text.trim();
-    await widget.widgetRef.read(remindersDaoProvider).insertReminder(
-          RemindersCompanion(
-            catId: Value(_selectedCatId),
-            type: Value(_type),
-            dueDate: Value(_dueDate),
-            title: Value(title),
-            description: Value(desc.isEmpty ? null : desc),
-          ),
-        );
+    final dao = widget.widgetRef.read(remindersDaoProvider);
+    final id = await dao.insertReminder(
+      RemindersCompanion(
+        catId: Value(_selectedCatId),
+        type: Value(_type),
+        dueDate: Value(_dueDate),
+        title: Value(title),
+        description: Value(desc.isEmpty ? null : desc),
+      ),
+    );
+
+    // Schedule the notification for this new reminder.
+    final catName = widget.cats.firstWhere(
+      (c) => c.id == _selectedCatId,
+      orElse: () => widget.cats.first,
+    ).name;
+    final reminder = await dao.getReminderById(id);
+    if (reminder != null) {
+      await NotificationService.scheduleReminder(reminder, catName);
+    }
 
     if (mounted) Navigator.pop(context);
   }

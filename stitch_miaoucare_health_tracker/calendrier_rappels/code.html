@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&amp;family=Quicksand:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface": "#1b1c19",
+                    "primary": "#566342",
+                    "surface-container-highest": "#e4e2dd",
+                    "surface-container": "#f0eee9",
+                    "on-primary-fixed-variant": "#3f4b2c",
+                    "tertiary-fixed": "#ffd7f0",
+                    "tertiary": "#74556a",
+                    "on-primary": "#ffffff",
+                    "background": "#fbf9f4",
+                    "inverse-surface": "#30312d",
+                    "on-secondary-fixed-variant": "#1a4e50",
+                    "surface-container-high": "#eae8e3",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#becca3",
+                    "outline-variant": "#c6c8bb",
+                    "secondary-container": "#b9ecee",
+                    "secondary": "#356668",
+                    "surface": "#fbf9f4",
+                    "on-secondary-fixed": "#002021",
+                    "on-surface-variant": "#45483f",
+                    "on-tertiary-fixed": "#2b1325",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-container": "#53374b",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#fbf9f4",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed-dim": "#e2bbd4",
+                    "surface-variant": "#e4e2dd",
+                    "tertiary-container": "#c6a1b9",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#a3b18a",
+                    "primary-fixed": "#dae8be",
+                    "secondary-fixed": "#b9ecee",
+                    "on-secondary-container": "#3c6c6e",
+                    "primary-fixed-dim": "#becca3",
+                    "on-background": "#1b1c19",
+                    "outline": "#76786e",
+                    "inverse-on-surface": "#f3f0eb",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed-variant": "#5b3e52",
+                    "surface-container-low": "#f6f3ee",
+                    "on-primary-fixed": "#141f05",
+                    "on-primary-container": "#384425",
+                    "secondary-fixed-dim": "#9ecfd1",
+                    "surface-tint": "#566342",
+                    "surface-dim": "#dcdad5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "edge_margin": "20px",
+                    "xs": "4px",
+                    "sm": "12px",
+                    "gutter": "16px",
+                    "lg": "32px",
+                    "md": "24px",
+                    "xl": "48px"
+            },
+            "fontFamily": {
+                    "body-md": ["Nunito Sans"],
+                    "headline-md": ["Quicksand"],
+                    "label-sm": ["Nunito Sans"],
+                    "title-sm": ["Quicksand"],
+                    "display-lg": ["Quicksand"],
+                    "label-md": ["Nunito Sans"],
+                    "body-lg": ["Nunito Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "title-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.5px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #fbf9f4;
+            color: #1b1c19;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-xl">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim shadow-sm flex justify-between items-center w-full px-edge_margin py-sm sticky top-0 z-40">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed text-display-lg" data-icon="pets">pets</span>
+<h1 class="font-display-lg text-display-lg font-bold text-primary dark:text-primary-fixed">Pattes &amp; Carnets</h1>
+</div>
+<button class="material-symbols-outlined text-primary dark:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors p-xs rounded-full" data-icon="emergency_home">emergency_home</button>
+</header>
+<main class="px-edge_margin py-md space-y-md max-w-2xl mx-auto">
+<!-- Headline Section -->
+<header class="mb-lg">
+<h2 class="font-headline-md text-headline-md text-primary mb-xs">Rappels &amp; Soins</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Gardez un œil sur la santé de vos félins.</p>
+</header>
+<!-- Bento Grid / Asymmetric List Pattern -->
+<div class="grid grid-cols-1 gap-gutter">
+<!-- Item 1: Vermifuge (Status Orange) -->
+<div class="relative overflow-hidden bg-[#FEFAE0] rounded-xl shadow-[0_4px_20px_rgba(163,177,138,0.12)] p-edge_margin border-l-4 border-orange-400 flex items-start gap-gutter">
+<div class="bg-orange-50 p-sm rounded-lg">
+<span class="material-symbols-outlined text-orange-600" data-icon="medical_services">medical_services</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-md text-label-md bg-orange-100 text-orange-800 px-sm py-xs rounded-full">Demain</span>
+<span class="material-symbols-outlined text-on-surface-variant text-body-md" data-icon="more_vert">more_vert</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-on-surface">Vermifuge (Milo)</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Soin d'hygiène périodique</p>
+</div>
+</div>
+<!-- Asymmetric Divider -->
+<div class="flex items-center gap-sm px-base">
+<div class="h-px bg-outline-variant flex-1"></div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-widest">À venir</span>
+<div class="h-px bg-outline-variant w-12"></div>
+</div>
+<!-- Item 2: Vaccin (Status Blue/Secondary) -->
+<div class="relative overflow-hidden bg-[#FEFAE0] rounded-xl shadow-[0_4px_20px_rgba(163,177,138,0.12)] p-edge_margin border-l-4 border-secondary flex items-start gap-gutter">
+<div class="bg-secondary-container p-sm rounded-lg">
+<span class="material-symbols-outlined text-secondary" data-icon="vaccines">vaccines</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-md text-label-md bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full">Dans 12 jours</span>
+<span class="material-symbols-outlined text-on-surface-variant text-body-md" data-icon="event">event</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-on-surface">Vaccin Typhus (Luna)</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Rappel annuel obligatoire</p>
+</div>
+</div>
+<!-- Decorative Visual Break -->
+<div class="rounded-xl overflow-hidden h-32 relative group">
+<img alt="Chat calme" class="w-full h-full object-cover" data-alt="A serene close-up of a fluffy ginger cat resting peacefully in a sun-drenched, minimalist living room with sage green accents. The lighting is soft and golden, creating a warm, nurturing atmosphere that reflects a calm pet health tracking environment. The high-end aesthetic is achieved through a shallow depth of field and a pristine, clean light-mode palette of cream and soft greens." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEYSY5uro09S-aoCU98zQ0E6wR5EJK9WgTHbCWHMGW7cjVTx4b6E2xQxqzcfvHGVliKDJjJY-J9fd1RRPFZqv8LTgxQlrISGLBZySSPlgaSSNVuliBoBhqiO6zGlVQo3xHuFceHF09kCIdGr_1WUw73KY-18SVCtuRUsOTFmGvAQ7pP27Hx6GNqkBTs7VrOcqCh0WU6zItWAGBHWNzaE7WHsqMW6TsKlp0rGE_2JDoVHpf697EjBn4B9jiXsd04r-QSrA8YyN92I7b"/>
+<div class="absolute inset-0 bg-primary/20 flex items-center justify-center">
+<p class="font-title-sm text-white drop-shadow-md">Luna &amp; Milo se portent bien</p>
+</div>
+</div>
+<!-- Item 3: Vétérinaire -->
+<div class="relative overflow-hidden bg-[#FEFAE0] rounded-xl shadow-[0_4px_20px_rgba(163,177,138,0.12)] p-edge_margin border-l-4 border-primary flex items-start gap-gutter">
+<div class="bg-primary-fixed p-sm rounded-lg">
+<span class="material-symbols-outlined text-primary" data-icon="stethoscope">stethoscope</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-md text-label-md bg-primary-fixed text-on-primary-fixed-variant px-sm py-xs rounded-full">15 Mai</span>
+<span class="material-symbols-outlined text-on-surface-variant text-body-md" data-icon="notifications_active">notifications_active</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-on-surface">Rendez-vous Vétérinaire</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Check-up annuel complet</p>
+</div>
+</div>
+</div>
+<!-- Secondary Actions Section -->
+<section class="mt-xl pt-lg border-t border-outline-variant">
+<h4 class="font-label-md text-label-md text-on-surface-variant mb-md uppercase tracking-wider">Soins rapides</h4>
+<div class="flex gap-sm overflow-x-auto pb-sm no-scrollbar">
+<button class="flex-shrink-0 flex items-center gap-xs bg-surface-container-high px-md py-sm rounded-full font-label-md text-on-surface hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="restaurant">restaurant</span>
+                    Alimentation
+                </button>
+<button class="flex-shrink-0 flex items-center gap-xs bg-surface-container-high px-md py-sm rounded-full font-label-md text-on-surface hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="soap">soap</span>
+                    Hygiène
+                </button>
+<button class="flex-shrink-0 flex items-center gap-xs bg-surface-container-high px-md py-sm rounded-full font-label-md text-on-surface hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="medication">medication</span>
+                    Traitement
+                </button>
+</div>
+</section>
+</main>
+<!-- FAB (Contextual) -->
+<button class="fixed bottom-24 right-6 bg-primary text-on-primary w-14 h-14 rounded-2xl shadow-lg flex items-center justify-center hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[28px]" data-icon="add">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-base py-sm bg-surface-container dark:bg-surface-container-highest rounded-t-xl shadow-[0_-4px_20px_rgba(163,177,138,0.12)]">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<!-- Journal -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-sm text-label-sm">Journal</span>
+</a>
+<!-- Calendar (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-fixed-variant text-on-primary-container dark:text-on-primary-fixed-variant rounded-full px-4 py-1 scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<span class="font-label-sm text-label-sm">Calendar</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>

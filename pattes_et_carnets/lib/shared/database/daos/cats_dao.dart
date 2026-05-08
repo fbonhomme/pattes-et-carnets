@@ -9,6 +9,8 @@ class CatsDao extends DatabaseAccessor<AppDatabase> with _$CatsDaoMixin {
 
   Stream<List<Cat>> watchAllCats() => select(cats).watch();
 
+  Future<List<Cat>> getAllCats() => select(cats).get();
+
   Future<Cat?> getCatById(int id) =>
       (select(cats)..where((t) => t.id.equals(id))).getSingleOrNull();
 

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&amp;family=Nunito+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface": "#1b1c19",
+                    "primary": "#566342",
+                    "surface-container-highest": "#e4e2dd",
+                    "surface-container": "#f0eee9",
+                    "on-primary-fixed-variant": "#3f4b2c",
+                    "tertiary-fixed": "#ffd7f0",
+                    "tertiary": "#74556a",
+                    "on-primary": "#ffffff",
+                    "background": "#fbf9f4",
+                    "inverse-surface": "#30312d",
+                    "on-secondary-fixed-variant": "#1a4e50",
+                    "surface-container-high": "#eae8e3",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#becca3",
+                    "outline-variant": "#c6c8bb",
+                    "secondary-container": "#b9ecee",
+                    "secondary": "#356668",
+                    "surface": "#fbf9f4",
+                    "on-secondary-fixed": "#002021",
+                    "on-surface-variant": "#45483f",
+                    "on-tertiary-fixed": "#2b1325",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-container": "#53374b",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#fbf9f4",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed-dim": "#e2bbd4",
+                    "surface-variant": "#e4e2dd",
+                    "tertiary-container": "#c6a1b9",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#a3b18a",
+                    "primary-fixed": "#dae8be",
+                    "secondary-fixed": "#b9ecee",
+                    "on-secondary-container": "#3c6c6e",
+                    "primary-fixed-dim": "#becca3",
+                    "on-background": "#1b1c19",
+                    "outline": "#76786e",
+                    "inverse-on-surface": "#f3f0eb",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed-variant": "#5b3e52",
+                    "surface-container-low": "#f6f3ee",
+                    "on-primary-fixed": "#141f05",
+                    "on-primary-container": "#384425",
+                    "secondary-fixed-dim": "#9ecfd1",
+                    "surface-tint": "#566342",
+                    "surface-dim": "#dcdad5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "edge_margin": "20px",
+                    "xs": "4px",
+                    "sm": "12px",
+                    "gutter": "16px",
+                    "lg": "32px",
+                    "md": "24px",
+                    "xl": "48px"
+            },
+            "fontFamily": {
+                    "body-md": ["Nunito Sans"],
+                    "headline-md": ["Quicksand"],
+                    "label-sm": ["Nunito Sans"],
+                    "title-sm": ["Quicksand"],
+                    "display-lg": ["Quicksand"],
+                    "label-md": ["Nunito Sans"],
+                    "body-lg": ["Nunito Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "title-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.5px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #fbf9f4; /* background color */
+            font-family: 'Nunito Sans', sans-serif;
+            color: #1b1c19;
+        }
+        .organic-card-shadow {
+            box-shadow: 0 4px 20px rgba(163, 177, 138, 0.12);
+        }
+        .scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scroll-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim shadow-sm flex justify-between items-center w-full px-edge_margin py-sm sticky top-0 z-40">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" style="font-size: 24px;">pets</span>
+<h1 class="font-display-lg text-[24px] font-bold text-primary dark:text-primary-fixed">Pattes &amp; Carnets</h1>
+</div>
+<button class="hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors p-2 rounded-full active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed">emergency_home</span>
+</button>
+</header>
+<main class="max-w-xl mx-auto">
+<!-- Hero Section -->
+<section class="relative w-full h-[400px] overflow-hidden">
+<img alt="Luna" class="w-full h-full object-cover" data-alt="A majestic Maine Coon cat named Luna with long, silky silver-grey fur and tufted ears sits gracefully against a soft, sun-drenched background. The lighting is warm and natural, creating a cozy and organic atmosphere that aligns with a high-end pet care application. The overall aesthetic is minimalist and serene, using a palette of soft creams, sage greens, and muted earth tones to evoke a sense of home and well-being." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5ARS_QxARv550wRs4smIc7_P-GrY9E4eFUo6BJDshBud9kef7KhlqCt033AmcFzrZjM2TIrdDwmL6YYmB0Es3ljyeY_FG5PmQpi-CLANikzSJfhUYDnxtEkYS-nAopuVMqdBbDtdtNA-jXdOaHtm3qmqywz8QSMGkpfjBrrKlFpxUWBsdM9Ttks2P-uTIKVXclY4Xd7Lex-ckHsWI5lQBKxBKnqFHFvJKQ4CF1Qj5ddwUDHvDkBs1Q1nvRnmjARcKH6X5XLEMNXRT"/>
+<div class="absolute bottom-0 left-0 right-0 p-edge_margin bg-gradient-to-t from-black/60 to-transparent">
+<h2 class="font-display-lg text-white text-display-lg">Luna</h2>
+<p class="font-body-lg text-white/90 text-body-lg">Femelle • Maine Coon</p>
+<p class="font-label-md text-white/80 text-label-md">Née le 14/03/2022</p>
+</div>
+</section>
+<!-- Quick Stats Grid -->
+<section class="px-edge_margin py-md grid grid-cols-3 gap-gutter">
+<div class="bg-surface-container-low organic-card-shadow p-sm rounded-xl flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-1">calendar_today</span>
+<span class="font-label-sm text-on-surface-variant">Âge</span>
+<span class="font-title-sm text-primary text-[14px]">2 ans, 3 mois</span>
+</div>
+<div class="bg-surface-container-low organic-card-shadow p-sm rounded-xl flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-1">monitor_weight</span>
+<span class="font-label-sm text-on-surface-variant">Poids</span>
+<span class="font-title-sm text-primary text-[14px]">4.3 kg</span>
+</div>
+<div class="bg-surface-container-low organic-card-shadow p-sm rounded-xl flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-1">tag</span>
+<span class="font-label-sm text-on-surface-variant">Puce</span>
+<span class="font-title-sm text-primary text-[14px]">250XXXX</span>
+</div>
+</section>
+<!-- Health Status Section -->
+<section class="px-edge_margin py-base">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-gutter">Santé &amp; Prévention</h3>
+<div class="flex flex-col gap-sm">
+<!-- Status: OK (Sage) -->
+<div class="bg-[#FEFAE0] organic-card-shadow rounded-xl p-edge_margin flex items-center gap-gutter border-l-4 border-primary">
+<div class="bg-primary-container/20 p-2 rounded-full">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-primary">Vaccins</p>
+<p class="font-body-md text-on-surface-variant">À jour - Tous les rappels effectués</p>
+</div>
+<span class="bg-primary/10 text-primary font-label-sm px-3 py-1 rounded-full">OK</span>
+</div>
+<!-- Status: Upcoming (Blue) -->
+<div class="bg-[#FEFAE0] organic-card-shadow rounded-xl p-edge_margin flex items-center gap-gutter border-l-4 border-secondary">
+<div class="bg-secondary-container p-2 rounded-full">
+<span class="material-symbols-outlined text-secondary">medical_services</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-secondary">Prochain Rappel</p>
+<p class="font-body-md text-on-surface-variant">Coryza dans 18 jours</p>
+</div>
+<span class="material-symbols-outlined text-secondary">event</span>
+</div>
+<!-- Status: Warning (Orange/Ochre) -->
+<div class="bg-[#FEFAE0] organic-card-shadow rounded-xl p-edge_margin flex items-center gap-gutter border-l-4 border-[#b87333]">
+<div class="bg-tertiary-fixed p-2 rounded-full">
+<span class="material-symbols-outlined text-tertiary">pill</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-tertiary">Vermifuge</p>
+<p class="font-body-md text-on-surface-variant">Prévu pour demain</p>
+</div>
+<span class="bg-tertiary/10 text-tertiary font-label-sm px-3 py-1 rounded-full">Demain</span>
+</div>
+</div>
+</section>
+<!-- Recent Notes -->
+<section class="px-edge_margin py-md">
+<div class="flex justify-between items-center mb-gutter">
+<h3 class="font-headline-md text-headline-md text-on-surface">Dernières Notes</h3>
+<span class="font-label-md text-primary">Voir tout</span>
+</div>
+<div class="bg-[#FEFAE0] organic-card-shadow rounded-xl p-edge_margin relative overflow-hidden">
+<div class="absolute top-0 right-0 p-base">
+<span class="material-symbols-outlined text-outline-variant">history_edu</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic">"Très sociable. Allergique au saumon. Surveiller son hydratation l'été."</p>
+<p class="font-label-sm text-outline mt-sm">Modifié il y a 2 jours</p>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-base py-sm bg-surface-container dark:bg-surface-container-highest shadow-[0_-4px_20px_rgba(163,177,138,0.12)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-sm text-label-sm">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label-sm text-label-sm">Calendar</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-fixed-variant text-on-primary-container dark:text-on-primary-fixed-variant rounded-full px-4 py-1 scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>

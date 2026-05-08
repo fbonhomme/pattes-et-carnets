@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mode Urgence - Pattes &amp; Carnets</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&amp;family=Quicksand:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#1b1c19",
+                        "primary": "#566342",
+                        "surface-container-highest": "#e4e2dd",
+                        "surface-container": "#f0eee9",
+                        "on-primary-fixed-variant": "#3f4b2c",
+                        "tertiary-fixed": "#ffd7f0",
+                        "tertiary": "#74556a",
+                        "on-primary": "#ffffff",
+                        "background": "#fbf9f4",
+                        "inverse-surface": "#30312d",
+                        "on-secondary-fixed-variant": "#1a4e50",
+                        "surface-container-high": "#eae8e3",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#becca3",
+                        "outline-variant": "#c6c8bb",
+                        "secondary-container": "#b9ecee",
+                        "secondary": "#356668",
+                        "surface": "#fbf9f4",
+                        "on-secondary-fixed": "#002021",
+                        "on-surface-variant": "#45483f",
+                        "on-tertiary-fixed": "#2b1325",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#53374b",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#fbf9f4",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed-dim": "#e2bbd4",
+                        "surface-variant": "#e4e2dd",
+                        "tertiary-container": "#c6a1b9",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#a3b18a",
+                        "primary-fixed": "#dae8be",
+                        "secondary-fixed": "#b9ecee",
+                        "on-secondary-container": "#3c6c6e",
+                        "primary-fixed-dim": "#becca3",
+                        "on-background": "#1b1c19",
+                        "outline": "#76786e",
+                        "inverse-on-surface": "#f3f0eb",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#5b3e52",
+                        "surface-container-low": "#f6f3ee",
+                        "on-primary-fixed": "#141f05",
+                        "on-primary-container": "#384425",
+                        "secondary-fixed-dim": "#9ecfd1",
+                        "surface-tint": "#566342",
+                        "surface-dim": "#dcdad5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "edge_margin": "20px",
+                        "xs": "4px",
+                        "sm": "12px",
+                        "gutter": "16px",
+                        "lg": "32px",
+                        "md": "24px",
+                        "xl": "48px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Nunito Sans"],
+                        "headline-md": ["Quicksand"],
+                        "label-sm": ["Nunito Sans"],
+                        "title-sm": ["Quicksand"],
+                        "display-lg": ["Quicksand"],
+                        "label-md": ["Nunito Sans"],
+                        "body-lg": ["Nunito Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "title-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.5px", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .emergency-shadow {
+            box-shadow: 0 4px 20px rgba(163, 177, 138, 0.12);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-edge_margin py-sm bg-surface shadow-sm">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-primary" data-icon="pets">pets</span>
+<h1 class="font-display-lg text-display-lg font-bold text-primary">Pattes &amp; Carnets</h1>
+</div>
+<button class="text-on-surface-variant hover:bg-surface-container-high transition-colors p-base rounded-full active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="emergency_home">emergency_home</span>
+</button>
+</header>
+<main class="pt-24 pb-lg px-edge_margin max-w-2xl mx-auto">
+<!-- Emergency Header -->
+<section class="mb-md text-center">
+<div class="inline-flex items-center gap-xs px-md py-sm bg-error rounded-full text-on-error mb-base emergency-shadow">
+<span class="material-symbols-outlined" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Mode Urgence</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mt-sm">Infos Vitales - Luna</h2>
+</section>
+<!-- Main Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Luna Identification Card -->
+<div class="md:col-span-2 bg-surface-container-lowest p-md rounded-xl emergency-shadow border-l-4 border-error flex items-center gap-md">
+<div class="w-24 h-24 rounded-full overflow-hidden flex-shrink-0 bg-surface-container">
+<img alt="Luna the cat" class="w-full h-full object-cover" data-alt="A close-up, high-quality portrait of a calm domestic shorthair cat with amber eyes and soft grey fur. The lighting is warm and natural, following an organic minimalist aesthetic. The background is a soft beige bokeh, creating a nurturing and clean atmosphere typical of a premium feline healthcare application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-e5FDblm23KiutJ0RJtN4G-txstNqYEgp-eCEyhClv60ro59HoHUt5RcKMOYUCAuaKrTTqs4Rx7mSeLeWG-wY_JZbfBl8dbMyO4UgTYd4nTniWt7Xs2SME1GvqK3BxeocGDh0nsbrCHxSJaim6kpVweFrCz7e7PhVwYXIJmu1xl8efazsahOyWKvt5tymBiQq36DqaGgTtLRlYlXdyVNo_epGx6xQ1667LCafrMeQS3RrRHDcV3DUT28-OhZhb2CwyMGgST8Vi9jU"/>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm text-primary">Luna</h3>
+<div class="flex flex-wrap gap-xs mt-xs">
+<span class="bg-surface-container-high text-on-surface-variant px-sm py-xs rounded-full font-label-sm text-label-sm">Âge: 4 ans</span>
+<span class="bg-surface-container-high text-on-surface-variant px-sm py-xs rounded-full font-label-sm text-label-sm">Poids: 4.3 kg</span>
+</div>
+</div>
+</div>
+<!-- Health Alerts -->
+<div class="bg-surface-container-lowest p-md rounded-xl emergency-shadow">
+<div class="flex items-center gap-base mb-sm text-error">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<h4 class="font-label-md text-label-md">Santé &amp; Alertes</h4>
+</div>
+<div class="space-y-sm">
+<div class="flex justify-between items-center py-xs border-b border-surface-container-highest">
+<span class="text-on-surface-variant font-body-md">Groupe sanguin</span>
+<span class="font-bold text-primary font-title-sm">A</span>
+</div>
+<div class="flex flex-col gap-xs py-xs">
+<span class="text-on-surface-variant font-body-md">Allergies critiques</span>
+<div class="inline-flex items-center self-start gap-xs px-sm py-xs bg-error-container text-on-error-container rounded-full font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="no_food">no_food</span>
+                            Saumon
+                        </div>
+</div>
+</div>
+</div>
+<!-- Ongoing Treatment -->
+<div class="bg-surface-container-lowest p-md rounded-xl emergency-shadow">
+<div class="flex items-center gap-base mb-sm text-primary">
+<span class="material-symbols-outlined" data-icon="pill">pill</span>
+<h4 class="font-label-md text-label-md">Traitements en cours</h4>
+</div>
+<div class="h-24 flex items-center justify-center border-2 border-dashed border-outline-variant rounded-lg">
+<span class="text-on-surface-variant font-body-md italic">Aucun traitement</span>
+</div>
+</div>
+<!-- Veterinary Contact -->
+<div class="md:col-span-2 bg-primary-container p-md rounded-xl emergency-shadow text-on-primary-container">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-md">
+<div class="flex items-center gap-md">
+<div class="bg-on-primary-container text-primary-container p-sm rounded-lg">
+<span class="material-symbols-outlined" data-icon="local_hospital">local_hospital</span>
+</div>
+<div>
+<h4 class="font-title-sm text-title-sm">Clinique du Parc</h4>
+<p class="font-body-md opacity-90 text-sm">Vétérinaire référent</p>
+</div>
+</div>
+<a class="bg-error text-on-error flex items-center justify-center gap-base px-xl py-md rounded-full font-label-md text-label-md shadow-lg active:scale-95 transition-transform" href="tel:0123456789">
+<span class="material-symbols-outlined" data-icon="call" style="font-variation-settings: 'FILL' 1;">call</span>
+                        APPELER LA CLINIQUE
+                    </a>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="md:col-span-2 grid grid-cols-2 gap-gutter mt-base">
+<button class="bg-surface-container p-md rounded-xl flex flex-col items-center gap-sm text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+<span class="font-label-md text-label-md">Partager Profil</span>
+</button>
+<button class="bg-surface-container p-md rounded-xl flex flex-col items-center gap-sm text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-label-md text-label-md">Carnet de Santé</span>
+</button>
+</div>
+</div>
+<!-- Exit Action -->
+<div class="mt-xl text-center">
+<button class="text-on-surface-variant font-label-md text-label-md flex items-center gap-base mx-auto opacity-70 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+                Quitter le mode urgence
+            </button>
+</div>
+</main>
+<!-- Visual Accent Element -->
+<div class="fixed bottom-0 right-0 p-lg pointer-events-none opacity-5">
+<span class="material-symbols-outlined text-[180px]" data-icon="emergency">emergency</span>
+</div>
+</body></html>

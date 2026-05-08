@@ -21,6 +21,12 @@ class RemindersDao extends DatabaseAccessor<AppDatabase>
             ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
           .watch();
 
+  Future<Reminder?> getReminderById(int id) =>
+      (select(reminders)..where((t) => t.id.equals(id))).getSingleOrNull();
+
+  Future<List<Reminder>> getPendingReminders() =>
+      (select(reminders)..where((t) => t.isDone.equals(false))).get();
+
   Future<int> insertReminder(RemindersCompanion reminder) =>
       into(reminders).insert(reminder);
 

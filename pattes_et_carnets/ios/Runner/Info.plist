@@ -4,6 +4,12 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>Pattes &amp; Carnets utilise les notifications pour vous rappeler les soins et rendez-vous vétérinaires.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Pattes &amp; Carnets accède à vos photos pour ajouter une photo à votre chat ou à une entrée du journal.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Pattes &amp; Carnets peut utiliser l'appareil photo pour photographier votre chat.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Pattes Et Carnets</string>
 	<key>CFBundleExecutable</key>

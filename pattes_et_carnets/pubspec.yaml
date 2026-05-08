@@ -49,6 +49,8 @@ dependencies:
   cached_network_image: ^3.4.1
   # Notifications
   flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+  flutter_timezone: ^1.0.8
   # Phone / URL
   url_launcher: ^6.3.1
   # Date formatting (French)
