@@ -115,6 +115,11 @@ class _HeroSliverAppBar extends ConsumerWidget {
       iconTheme: const IconThemeData(color: Colors.white),
       actions: [
         IconButton(
+          icon: const Icon(Icons.photo_camera_outlined),
+          tooltip: 'Photo de profil',
+          onPressed: () => _showPhotoOptions(context, ref),
+        ),
+        IconButton(
           icon: const Icon(Icons.edit_outlined),
           tooltip: 'Modifier',
           onPressed: () => _showEditSheet(context, ref),
@@ -139,7 +144,10 @@ class _HeroSliverAppBar extends ConsumerWidget {
           ),
         ),
         stretchModes: const [StretchMode.zoomBackground],
-        background: _HeroBackground(cat: cat),
+        background: _HeroBackground(
+          cat: cat,
+          onPhotoTap: () => _showPhotoOptions(context, ref),
+        ),
       ),
     );
   }
@@ -152,55 +160,139 @@ class _HeroSliverAppBar extends ConsumerWidget {
       builder: (_) => _EditCatSheet(cat: cat, ref: ref),
     );
   }
+
+  Future<void> _showPhotoOptions(BuildContext context, WidgetRef ref) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final scheme = Theme.of(ctx).colorScheme;
+        return Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+          decoration: BoxDecoration(
+            color: scheme.surface,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: scheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text('Photo de profil', style: Theme.of(ctx).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: scheme.primaryContainer,
+                  child: Icon(Icons.camera_alt_outlined, color: scheme.onPrimaryContainer),
+                ),
+                title: const Text('Prendre une photo'),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              ),
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: scheme.secondaryContainer,
+                  child: Icon(Icons.photo_library_outlined, color: scheme.onSecondaryContainer),
+                ),
+                title: const Text('Choisir dans la galerie'),
+                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+    if (source == null || !context.mounted) return;
+    await _pickPhoto(context, ref, source);
+  }
+
+  Future<void> _pickPhoto(BuildContext context, WidgetRef ref, ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(source: source, imageQuality: 85, maxWidth: 1200);
+      if (image == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Aucune photo reçue — réessayez')),
+          );
+        }
+        return;
+      }
+      final appDir = await getApplicationDocumentsDirectory();
+      final photosDir = Directory(p.join(appDir.path, 'cat_photos'));
+      await photosDir.create(recursive: true);
+      final dest = p.join(photosDir.path, 'cat_${cat.id}_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await File(image.path).copy(dest);
+      if (cat.photoPath != null && cat.photoPath!.isNotEmpty) {
+        try { await File(cat.photoPath!).delete(); } catch (_) {}
+      }
+      await ref.read(catsDaoProvider).updateCat(
+        CatsCompanion(id: Value(cat.id), photoPath: Value(dest)),
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Photo enregistrée ✓'), duration: Duration(seconds: 2)),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur photo : $e')),
+        );
+      }
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
 // Hero background: photo + gradient + info overlay
 // ---------------------------------------------------------------------------
 
-class _HeroBackground extends ConsumerWidget {
-  const _HeroBackground({required this.cat});
+class _HeroBackground extends StatelessWidget {
+  const _HeroBackground({required this.cat, required this.onPhotoTap});
 
   final Cat cat;
+  final VoidCallback onPhotoTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final hasPhoto = cat.photoPath != null && cat.photoPath!.isNotEmpty;
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Photo or placeholder
-        GestureDetector(
-          onTap: () => _pickPhoto(context, ref),
-          child: hasPhoto
-              ? Image.file(File(cat.photoPath!), fit: BoxFit.cover)
-              : Container(
-                  color: scheme.surfaceContainerHigh,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        cat.name.isNotEmpty ? cat.name[0].toUpperCase() : '?',
-                        style: TextStyle(
-                          fontFamily: 'Quicksand',
-                          fontSize: 96,
-                          fontWeight: FontWeight.w700,
-                          color: scheme.primary.withAlpha(80),
-                        ),
+        hasPhoto
+            ? Image.file(File(cat.photoPath!), fit: BoxFit.cover)
+            : Container(
+                color: scheme.surfaceContainerHigh,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      cat.name.isNotEmpty ? cat.name[0].toUpperCase() : '?',
+                      style: TextStyle(
+                        fontFamily: 'Quicksand',
+                        fontSize: 96,
+                        fontWeight: FontWeight.w700,
+                        color: scheme.primary.withAlpha(80),
                       ),
-                      Icon(Icons.add_a_photo_outlined,
-                          size: 28, color: scheme.outline),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Ajouter une photo',
-                        style: TextStyle(color: scheme.outline, fontSize: 13),
-                      ),
-                    ],
-                  ),
+                    ),
+                    Icon(Icons.add_a_photo_outlined, size: 28, color: scheme.outline),
+                    const SizedBox(height: 4),
+                    Text('Ajouter une photo',
+                        style: TextStyle(color: scheme.outline, fontSize: 13)),
+                  ],
                 ),
-        ),
+              ),
         // Bottom gradient
         const DecoratedBox(
           decoration: BoxDecoration(
@@ -212,7 +304,7 @@ class _HeroBackground extends ConsumerWidget {
             ),
           ),
         ),
-        // Info overlay (breed + birthdate) — fades with the background
+        // Info overlay (breed + birthdate)
         Positioned(
           left: 20,
           right: 20,
@@ -222,76 +314,18 @@ class _HeroBackground extends ConsumerWidget {
             children: [
               Text(
                 '${cat.sex.label} • ${cat.breed ?? 'Race inconnue'}',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 17,
-                  fontFamily: 'Nunito Sans',
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 17, fontFamily: 'Nunito Sans'),
               ),
               if (cat.birthDate != null)
                 Text(
                   'Né(e) le ${_formatDate(cat.birthDate!)}',
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 13,
-                    fontFamily: 'Nunito Sans',
-                  ),
+                  style: const TextStyle(color: Colors.white54, fontSize: 13, fontFamily: 'Nunito Sans'),
                 ),
             ],
           ),
         ),
-        // Camera overlay badge (if photo exists)
-        if (hasPhoto)
-          Positioned(
-            bottom: 56,
-            right: 16,
-            child: GestureDetector(
-              onTap: () => _pickPhoto(context, ref),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black38,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white30),
-                ),
-                child: const Icon(Icons.photo_camera,
-                    color: Colors.white, size: 18),
-              ),
-            ),
-          ),
       ],
     );
-  }
-
-  Future<void> _pickPhoto(BuildContext context, WidgetRef ref) async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-      maxWidth: 1200,
-    );
-    if (image == null) return;
-
-    // Copy to persistent app storage — image_picker returns a temp cache path.
-    final appDir = await getApplicationDocumentsDirectory();
-    final photosDir = Directory(p.join(appDir.path, 'cat_photos'));
-    await photosDir.create(recursive: true);
-    final dest = p.join(
-      photosDir.path,
-      'cat_${cat.id}_${DateTime.now().millisecondsSinceEpoch}.jpg',
-    );
-    await File(image.path).copy(dest);
-
-    // Delete the previous photo file to avoid accumulating stale files.
-    if (cat.photoPath != null && cat.photoPath!.isNotEmpty) {
-      try {
-        await File(cat.photoPath!).delete();
-      } catch (_) {}
-    }
-
-    await ref.read(catsDaoProvider).updateCat(
-          CatsCompanion(id: Value(cat.id), photoPath: Value(dest)),
-        );
   }
 
   String _formatDate(DateTime d) =>
@@ -713,6 +747,88 @@ class _EditCatSheetState extends ConsumerState<_EditCatSheet> {
     super.dispose();
   }
 
+  Future<void> _pickPhotoFromSheet(BuildContext ctx) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: ctx,
+      backgroundColor: Colors.transparent,
+      builder: (bsCtx) {
+        final scheme = Theme.of(bsCtx).colorScheme;
+        return Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+          decoration: BoxDecoration(
+            color: scheme.surface,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: scheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text('Photo de profil', style: Theme.of(bsCtx).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: scheme.primaryContainer,
+                  child: Icon(Icons.camera_alt_outlined, color: scheme.onPrimaryContainer),
+                ),
+                title: const Text('Prendre une photo'),
+                onTap: () => Navigator.pop(bsCtx, ImageSource.camera),
+              ),
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: scheme.secondaryContainer,
+                  child: Icon(Icons.photo_library_outlined, color: scheme.onSecondaryContainer),
+                ),
+                title: const Text('Choisir dans la galerie'),
+                onTap: () => Navigator.pop(bsCtx, ImageSource.gallery),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+    if (source == null || !ctx.mounted) return;
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(source: source, imageQuality: 85, maxWidth: 1200);
+      if (image == null) {
+        if (ctx.mounted) {
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            const SnackBar(content: Text('Aucune photo reçue — réessayez')),
+          );
+        }
+        return;
+      }
+      final appDir = await getApplicationDocumentsDirectory();
+      final photosDir = Directory(p.join(appDir.path, 'cat_photos'));
+      await photosDir.create(recursive: true);
+      final dest = p.join(photosDir.path, 'cat_${widget.cat.id}_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await File(image.path).copy(dest);
+      if (widget.cat.photoPath != null && widget.cat.photoPath!.isNotEmpty) {
+        try { await File(widget.cat.photoPath!).delete(); } catch (_) {}
+      }
+      await ref.read(catsDaoProvider).updateCat(
+        CatsCompanion(id: Value(widget.cat.id), photoPath: Value(dest)),
+      );
+      if (ctx.mounted) Navigator.pop(ctx);
+    } catch (e) {
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text('Erreur photo : $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _save() async {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) return;
@@ -895,7 +1011,13 @@ class _EditCatSheetState extends ConsumerState<_EditCatSheet> {
             ),
             const SizedBox(height: 20),
             Text('Modifier le profil', style: theme.textTheme.headlineMedium),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.photo_camera_outlined),
+              label: Text(widget.cat.photoPath != null ? 'Changer la photo' : 'Ajouter une photo'),
+              onPressed: () => _pickPhotoFromSheet(context),
+            ),
+            const SizedBox(height: 14),
             TextField(
               controller: _nameCtrl,
               textCapitalization: TextCapitalization.words,

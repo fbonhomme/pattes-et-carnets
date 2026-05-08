@@ -19,7 +19,8 @@ class CatsDao extends DatabaseAccessor<AppDatabase> with _$CatsDaoMixin {
 
   Future<int> insertCat(CatsCompanion cat) => into(cats).insert(cat);
 
-  Future<bool> updateCat(CatsCompanion cat) => update(cats).replace(cat);
+  Future<int> updateCat(CatsCompanion cat) =>
+      (update(cats)..where((t) => t.id.equals(cat.id.value))).write(cat);
 
   Future<int> deleteCat(int id) =>
       (delete(cats)..where((t) => t.id.equals(id))).go();
