@@ -20,25 +20,34 @@ final appRouter = GoRouter(
       routes: [
         GoRoute(
           path: '/',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: HomeScreen(),
+          pageBuilder: (context, state) => NoTransitionPage(
+            key: state.pageKey,
+            child: const HomeScreen(),
           ),
         ),
         GoRoute(
-          path: '/journal/:catId',
+          path: '/journal',
           pageBuilder: (context, state) => NoTransitionPage(
-            child: JournalScreen(catId: state.pathParameters['catId']!),
+            key: state.pageKey,
+            child: const JournalScreen(),
           ),
         ),
         GoRoute(
           path: '/calendar',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: CalendarScreen(),
+          pageBuilder: (context, state) => NoTransitionPage(
+            key: state.pageKey,
+            child: const CalendarScreen(),
           ),
         ),
       ],
     ),
     // Full-screen routes (outside the shell / bottom nav)
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/journal/:catId',
+      builder: (context, state) =>
+          JournalScreen(catId: state.pathParameters['catId']!),
+    ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/cat/:catId',

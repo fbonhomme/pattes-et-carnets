@@ -8,7 +8,7 @@ class ScaffoldWithNav extends StatelessWidget {
 
   static const _tabs = [
     (path: '/', icon: Icons.home_outlined, activeIcon: Icons.home, label: 'Accueil'),
-    (path: '/journal/all', icon: Icons.history_edu_outlined, activeIcon: Icons.history_edu, label: 'Journal'),
+    (path: '/journal', icon: Icons.history_edu_outlined, activeIcon: Icons.history_edu, label: 'Journal'),
     (path: '/calendar', icon: Icons.calendar_month_outlined, activeIcon: Icons.calendar_month, label: 'Calendrier'),
   ];
 

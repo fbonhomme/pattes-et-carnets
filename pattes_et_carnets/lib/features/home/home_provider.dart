@@ -16,6 +16,11 @@ final catHealthEntriesProvider =
   return ref.watch(healthEntriesDaoProvider).watchEntriesForCat(catId);
 });
 
+final allHealthEntriesProvider =
+    StreamProvider.autoDispose<List<HealthEntry>>((ref) {
+  return ref.watch(healthEntriesDaoProvider).watchAllEntries();
+});
+
 final vetByIdProvider =
     StreamProvider.autoDispose.family<Vet?, int>((ref, vetId) {
   return ref.watch(vetsDaoProvider).watchVetById(vetId);

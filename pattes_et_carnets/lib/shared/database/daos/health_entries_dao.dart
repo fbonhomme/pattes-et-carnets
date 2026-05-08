@@ -8,6 +8,12 @@ class HealthEntriesDao extends DatabaseAccessor<AppDatabase>
     with _$HealthEntriesDaoMixin {
   HealthEntriesDao(super.db);
 
+  /// All entries across every cat, most recent first.
+  Stream<List<HealthEntry>> watchAllEntries() =>
+      (select(healthEntries)
+            ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+          .watch();
+
   /// Entries for one cat, most recent first.
   Stream<List<HealthEntry>> watchEntriesForCat(int catId) =>
       (select(healthEntries)
