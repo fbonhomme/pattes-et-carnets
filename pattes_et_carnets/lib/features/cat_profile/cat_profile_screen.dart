@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:drift/drift.dart' show Value;
 
 import 'package:pattes_et_carnets/app/theme.dart';
@@ -269,8 +271,26 @@ class _HeroBackground extends ConsumerWidget {
       maxWidth: 1200,
     );
     if (image == null) return;
+
+    // Copy to persistent app storage — image_picker returns a temp cache path.
+    final appDir = await getApplicationDocumentsDirectory();
+    final photosDir = Directory(p.join(appDir.path, 'cat_photos'));
+    await photosDir.create(recursive: true);
+    final dest = p.join(
+      photosDir.path,
+      'cat_${cat.id}_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
+    await File(image.path).copy(dest);
+
+    // Delete the previous photo file to avoid accumulating stale files.
+    if (cat.photoPath != null && cat.photoPath!.isNotEmpty) {
+      try {
+        await File(cat.photoPath!).delete();
+      } catch (_) {}
+    }
+
     await ref.read(catsDaoProvider).updateCat(
-          CatsCompanion(id: Value(cat.id), photoPath: Value(image.path)),
+          CatsCompanion(id: Value(cat.id), photoPath: Value(dest)),
         );
   }
 
