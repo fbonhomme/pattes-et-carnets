@@ -27,6 +27,11 @@ class RemindersDao extends DatabaseAccessor<AppDatabase>
   Future<List<Reminder>> getPendingReminders() =>
       (select(reminders)..where((t) => t.isDone.equals(false))).get();
 
+  Future<List<Reminder>> getPendingRemindersForCat(int catId) =>
+      (select(reminders)
+            ..where((t) => t.catId.equals(catId) & t.isDone.equals(false)))
+          .get();
+
   Future<int> insertReminder(RemindersCompanion reminder) =>
       into(reminders).insert(reminder);
 

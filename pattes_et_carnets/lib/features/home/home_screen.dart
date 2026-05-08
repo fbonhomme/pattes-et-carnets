@@ -5,6 +5,7 @@ import 'package:pattes_et_carnets/features/home/home_provider.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 import 'package:pattes_et_carnets/shared/providers/database_provider.dart';
+import 'package:pattes_et_carnets/shared/services/notification_service.dart';
 import 'package:pattes_et_carnets/shared/widgets/cat_card.dart';
 import 'package:drift/drift.dart' show Value;
 
@@ -69,14 +70,14 @@ class HomeScreen extends ConsumerWidget {
 // Cat list + stats
 // ---------------------------------------------------------------------------
 
-class _CatList extends StatelessWidget {
+class _CatList extends ConsumerWidget {
   const _CatList({required this.cats, required this.weekCount});
 
   final List<Cat> cats;
   final int weekCount;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -91,49 +92,102 @@ class _CatList extends StatelessWidget {
               ?.copyWith(color: scheme.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
-        // Cat cards
         for (final cat in cats) ...[
           CatCard(
             cat: cat,
             onTap: () => context.push('/cat/${cat.id}'),
-            onMoreTap: () => _showCatMenu(context, cat),
+            onMoreTap: () => _showCatMenu(context, cat, ref),
           ),
           const SizedBox(height: 16),
         ],
         const SizedBox(height: 8),
-        // Stats row
         _StatsRow(weekCount: weekCount, catCount: cats.length),
       ],
     );
   }
 
-  void _showCatMenu(BuildContext context, Cat cat) {
+  void _showCatMenu(BuildContext context, Cat cat, WidgetRef ref) {
     showModalBottomSheet<void>(
       context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: const Text('Modifier'),
-              onTap: () {
-                Navigator.pop(context);
-                context.push('/cat/${cat.id}');
-              },
+      builder: (sheetCtx) {
+        final scheme = Theme.of(sheetCtx).colorScheme;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit_outlined),
+                title: const Text('Modifier'),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  context.push('/cat/${cat.id}');
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.crisis_alert_outlined),
+                title: const Text('Mode urgence'),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  context.push('/emergency/${cat.id}');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete_outline, color: scheme.error),
+                title: Text('Supprimer', style: TextStyle(color: scheme.error)),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  _confirmDeleteCat(context, cat, ref);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _confirmDeleteCat(BuildContext context, Cat cat, WidgetRef ref) {
+    showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) {
+        final scheme = Theme.of(dialogCtx).colorScheme;
+        return AlertDialog(
+          title: Text('Supprimer ${cat.name} ?'),
+          content: const Text(
+            'Le profil, le journal de santé et tous les rappels seront définitivement supprimés.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, false),
+              child: const Text('Annuler'),
             ),
-            ListTile(
-              leading: const Icon(Icons.crisis_alert_outlined),
-              title: const Text('Mode urgence'),
-              onTap: () {
-                Navigator.pop(context);
-                context.push('/emergency/${cat.id}');
-              },
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: scheme.error,
+                foregroundColor: scheme.onError,
+              ),
+              onPressed: () => Navigator.pop(dialogCtx, true),
+              child: const Text('Supprimer'),
             ),
           ],
-        ),
-      ),
-    );
+        );
+      },
+    ).then((confirmed) async {
+      if (confirmed == true && context.mounted) {
+        await _deleteCat(cat, ref);
+      }
+    });
+  }
+
+  Future<void> _deleteCat(Cat cat, WidgetRef ref) async {
+    final reminders =
+        await ref.read(remindersDaoProvider).getPendingRemindersForCat(cat.id);
+    for (final r in reminders) {
+      await NotificationService.cancelReminder(r.id);
+    }
+    await ref.read(healthEntriesDaoProvider).deleteAllForCat(cat.id);
+    await ref.read(remindersDaoProvider).deleteAllForCat(cat.id);
+    await ref.read(catsDaoProvider).deleteCat(cat.id);
   }
 }
 

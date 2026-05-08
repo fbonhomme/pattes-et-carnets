@@ -26,6 +26,10 @@ final vetByIdProvider =
   return ref.watch(vetsDaoProvider).watchVetById(vetId);
 });
 
+final allVetsProvider = StreamProvider.autoDispose<List<Vet>>((ref) {
+  return ref.watch(vetsDaoProvider).watchAllVets();
+});
+
 final catRemindersProvider =
     StreamProvider.autoDispose.family<List<Reminder>, int>((ref, catId) {
   return ref.watch(remindersDaoProvider).watchRemindersForCat(catId);

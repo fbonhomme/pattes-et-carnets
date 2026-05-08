@@ -679,6 +679,8 @@ class _EditCatSheetState extends ConsumerState<_EditCatSheet> {
 
   late CatSex _sex = widget.cat.sex;
   late DateTime? _birthDate = widget.cat.birthDate;
+  late final List<String> _allergies = List<String>.from(widget.cat.allergies);
+  late int? _selectedVetId = widget.cat.vetId;
   bool _saving = false;
 
   @override
@@ -712,10 +714,122 @@ class _EditCatSheetState extends ConsumerState<_EditCatSheet> {
             bloodType: Value(_bloodTypeCtrl.text.trim().isEmpty
                 ? null
                 : _bloodTypeCtrl.text.trim()),
+            allergies: Value(_allergies),
+            vetId: Value(_selectedVetId),
           ),
         );
 
     if (mounted) Navigator.pop(context);
+  }
+
+  Future<void> _addAllergen() async {
+    String? value;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        final ctrl = TextEditingController();
+        return AlertDialog(
+          title: const Text('Nouvelle allergie'),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(hintText: 'Ex: Poulet, Poisson…'),
+            onSubmitted: (_) {
+              value = ctrl.text.trim();
+              Navigator.pop(ctx);
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Annuler'),
+            ),
+            FilledButton(
+              onPressed: () {
+                value = ctrl.text.trim();
+                Navigator.pop(ctx);
+              },
+              child: const Text('Ajouter'),
+            ),
+          ],
+        );
+      },
+    );
+    if (value != null && value!.isNotEmpty && !_allergies.contains(value)) {
+      setState(() => _allergies.add(value!));
+    }
+  }
+
+  Future<void> _addVet() async {
+    final nameCtrl = TextEditingController();
+    final clinicCtrl = TextEditingController();
+    final phoneCtrl = TextEditingController();
+    int? newId;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Nouveau vétérinaire'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameCtrl,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(labelText: 'Nom *'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: clinicCtrl,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(labelText: 'Clinique'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: phoneCtrl,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'Téléphone',
+                prefixIcon: Icon(Icons.phone_outlined),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final name = nameCtrl.text.trim();
+              if (name.isEmpty) return;
+              newId = await ref.read(vetsDaoProvider).insertVet(
+                    VetsCompanion(
+                      name: Value(name),
+                      clinic: Value(clinicCtrl.text.trim().isEmpty
+                          ? null
+                          : clinicCtrl.text.trim()),
+                      phone: Value(phoneCtrl.text.trim()),
+                    ),
+                  );
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+            child: const Text('Créer'),
+          ),
+        ],
+      ),
+    );
+
+    nameCtrl.dispose();
+    clinicCtrl.dispose();
+    phoneCtrl.dispose();
+
+    if (newId != null && mounted) {
+      setState(() => _selectedVetId = newId);
+    }
   }
 
   Future<void> _pickDate() async {
@@ -733,6 +847,7 @@ class _EditCatSheetState extends ConsumerState<_EditCatSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final vetsAsync = ref.watch(allVetsProvider);
     final birthLabel = _birthDate != null
         ? '${_birthDate!.day.toString().padLeft(2, '0')}/${_birthDate!.month.toString().padLeft(2, '0')}/${_birthDate!.year}'
         : 'Choisir une date';
@@ -815,6 +930,66 @@ class _EditCatSheetState extends ConsumerState<_EditCatSheet> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(color: scheme.outlineVariant)),
+            ),
+            const SizedBox(height: 20),
+            Text('Allergies', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final allergen in _allergies)
+                  Chip(
+                    label: Text(allergen),
+                    deleteIcon: const Icon(Icons.close, size: 18),
+                    onDeleted: () =>
+                        setState(() => _allergies.remove(allergen)),
+                  ),
+                ActionChip(
+                  avatar: const Icon(Icons.add, size: 18),
+                  label: const Text('Ajouter'),
+                  onPressed: _addAllergen,
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text('Vétérinaire', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            vetsAsync.when(
+              data: (vets) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Aucun'),
+                        selected: _selectedVetId == null,
+                        onSelected: (_) =>
+                            setState(() => _selectedVetId = null),
+                      ),
+                      for (final vet in vets)
+                        ChoiceChip(
+                          label: Text(vet.name),
+                          selected: _selectedVetId == vet.id,
+                          onSelected: (_) =>
+                              setState(() => _selectedVetId = vet.id),
+                        ),
+                    ],
+                  ),
+                  TextButton.icon(
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Nouveau véto'),
+                    onPressed: _addVet,
+                  ),
+                ],
+              ),
+              loading: () => const SizedBox(
+                height: 32,
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
+              error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 28),
             SizedBox(
