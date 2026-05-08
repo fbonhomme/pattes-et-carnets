@@ -50,7 +50,7 @@ dependencies:
   # Notifications
   flutter_local_notifications: ^18.0.1
   timezone: ^0.9.4
-  flutter_timezone: ^1.0.8
+  flutter_timezone: ^3.0.0
   # Phone / URL
   url_launcher: ^6.3.1
   # Date formatting (French)

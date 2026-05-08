@@ -12,16 +12,20 @@ void main() async {
   await initializeDateFormatting('fr', null);
   await NotificationService.init();
 
-  final db = AppDatabase();
-  await DatabaseSeeder(db).seedIfEmpty();
+  try {
+    final db = AppDatabase();
+    await DatabaseSeeder(db).seedIfEmpty();
 
-  // Reschedule all pending reminders so notifications survive app restarts.
-  final pendingReminders = await db.remindersDao.getPendingReminders();
-  final cats = await db.catsDao.getAllCats();
-  final catNames = {for (final c in cats) c.id: c.name};
-  await NotificationService.rescheduleAll(pendingReminders, catNames);
+    // Reschedule pending reminders so notifications survive app restarts.
+    final pendingReminders = await db.remindersDao.getPendingReminders();
+    final cats = await db.catsDao.getAllCats();
+    final catNames = {for (final c in cats) c.id: c.name};
+    await NotificationService.rescheduleAll(pendingReminders, catNames);
+    await db.close();
+  } catch (_) {
+    // Never block startup because of notification/DB errors.
+  }
 
-  await db.close();
   runApp(const ProviderScope(child: PattesEtCarnetsApp()));
 }
 

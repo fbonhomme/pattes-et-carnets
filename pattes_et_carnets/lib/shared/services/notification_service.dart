@@ -43,14 +43,18 @@ class NotificationService {
         linux: linuxSettings,
       ),
     );
+  }
 
-    // Request Android 13+ POST_NOTIFICATIONS permission
-    if (defaultTargetPlatform == TargetPlatform.android) {
+  /// Request POST_NOTIFICATIONS permission (Android 13+).
+  /// Must be called after runApp(), from a widget, so the Activity is fully visible.
+  static Future<void> requestPermission() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    try {
       await _plugin
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
-    }
+    } catch (_) {}
   }
 
   /// Schedule (or immediately show if overdue) a notification for [reminder].
@@ -85,16 +89,30 @@ class NotificationService {
       await _plugin.show(reminder.id, title, body, details);
     } else {
       final tzScheduled = tz.TZDateTime.from(scheduled, tz.local);
-      await _plugin.zonedSchedule(
-        reminder.id,
-        title,
-        body,
-        tzScheduled,
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
+      try {
+        await _plugin.zonedSchedule(
+          reminder.id,
+          title,
+          body,
+          tzScheduled,
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+        );
+      } catch (_) {
+        // Exact alarm permission not granted — fall back to inexact scheduling.
+        await _plugin.zonedSchedule(
+          reminder.id,
+          title,
+          body,
+          tzScheduled,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexact,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+        );
+      }
     }
   }
 

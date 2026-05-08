@@ -9,11 +9,25 @@ import 'package:pattes_et_carnets/shared/services/notification_service.dart';
 import 'package:pattes_et_carnets/shared/widgets/cat_card.dart';
 import 'package:drift/drift.dart' show Value;
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Request notification permission after the first frame so the Activity is visible.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.requestPermission();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final catsAsync = ref.watch(catsStreamProvider);
     final weekCountAsync = ref.watch(weeklyReminderCountProvider);
 
