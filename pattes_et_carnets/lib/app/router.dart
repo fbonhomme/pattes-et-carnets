@@ -5,6 +5,7 @@ import 'package:pattes_et_carnets/features/journal/journal_screen.dart';
 import 'package:pattes_et_carnets/features/calendar/calendar_screen.dart';
 import 'package:pattes_et_carnets/features/cat_profile/cat_profile_screen.dart';
 import 'package:pattes_et_carnets/features/emergency/emergency_screen.dart';
+import 'package:pattes_et_carnets/features/splash/splash_screen.dart';
 import 'package:pattes_et_carnets/shared/widgets/scaffold_with_nav.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -12,8 +13,15 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/splash',
+      pageBuilder: (context, state) => const NoTransitionPage(
+        child: SplashScreen(),
+      ),
+    ),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) => ScaffoldWithNav(child: child),
