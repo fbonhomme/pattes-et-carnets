@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# AI tooling (skills, Claude Code, graphify)
+.agents/
+.claude/
+CLAUDE.md
+graphify-out/
+skills-lock.json
