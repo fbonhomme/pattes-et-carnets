@@ -21,6 +21,9 @@ class HealthEntriesDao extends DatabaseAccessor<AppDatabase>
             ..orderBy([(t) => OrderingTerm.desc(t.date)]))
           .watch();
 
+  Future<List<HealthEntry>> getEntriesForCat(int catId) =>
+      (select(healthEntries)..where((t) => t.catId.equals(catId))).get();
+
   Future<int> insertEntry(HealthEntriesCompanion entry) =>
       into(healthEntries).insert(entry);
 
@@ -29,8 +32,4 @@ class HealthEntriesDao extends DatabaseAccessor<AppDatabase>
 
   Future<int> deleteEntry(int id) =>
       (delete(healthEntries)..where((t) => t.id.equals(id))).go();
-
-  /// Delete all entries for a cat (used when deleting the cat).
-  Future<int> deleteAllForCat(int catId) =>
-      (delete(healthEntries)..where((t) => t.catId.equals(catId))).go();
 }

@@ -6,24 +6,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pattes_et_carnets/app/theme.dart';
-import 'package:pattes_et_carnets/features/home/home_provider.dart';
+import 'package:pattes_et_carnets/shared/providers/data_providers.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 import 'package:pattes_et_carnets/shared/providers/database_provider.dart';
+import 'package:pattes_et_carnets/shared/services/care_actions.dart';
+import 'package:pattes_et_carnets/shared/services/photo_storage.dart';
+import 'package:pattes_et_carnets/shared/widgets/photo_picker.dart';
 
 /// Shell tab → no catId (all entries).
 /// Full-screen push → catId provided (cat-specific entries).
 class JournalScreen extends StatelessWidget {
   const JournalScreen({super.key, this.catId});
 
-  final String? catId;
+  final int? catId;
 
   @override
   Widget build(BuildContext context) {
-    final id = catId != null ? int.tryParse(catId!) : null;
-    if (catId != null && id == null) {
-      return const Scaffold(body: Center(child: Text('ID invalide')));
-    }
+    final id = catId;
     return id != null ? _CatJournalView(catId: id) : const _AllJournalView();
   }
 }
@@ -65,12 +65,7 @@ class _AllJournalView extends ConsumerWidget {
             data: (entries) => entries.isEmpty
                 ? SliverFillRemaining(
                     child: _EmptyState(
-                      onAdd: () => _showAddEntrySheet(
-                        context,
-                        ref,
-                        null,
-                        catsAsync.valueOrNull ?? [],
-                      ),
+                      onAdd: () => _showEntrySheet(context, cats),
                     ),
                   )
                 : SliverPadding(
@@ -82,9 +77,15 @@ class _AllJournalView extends ConsumerWidget {
                           catName: catMap[entries[i].catId]?.name,
                           isFirst: i == 0,
                           isLast: i == entries.length - 1,
-                          onDelete: () => ref
-                              .read(healthEntriesDaoProvider)
-                              .deleteEntry(entries[i].id),
+                          onTap: () => _showEntrySheet(
+                            context,
+                            cats,
+                            entry: entries[i],
+                          ),
+                          onDelete: () => deleteEntry(
+                            ref.read(databaseProvider),
+                            entries[i],
+                          ),
                         ),
                         childCount: entries.length,
                       ),
@@ -100,33 +101,27 @@ class _AllJournalView extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddEntrySheet(
-          context,
-          ref,
-          null,
-          catsAsync.valueOrNull ?? [],
-        ),
+        onPressed: () => _showEntrySheet(context, cats),
         icon: const Icon(Icons.add_a_photo_outlined),
         label: const Text('Ajouter une note'),
       ),
     );
   }
 
-  Future<void> _showAddEntrySheet(
+  Future<void> _showEntrySheet(
     BuildContext context,
-    WidgetRef ref,
-    int? catId,
-    List<Cat> cats,
-  ) async {
+    List<Cat> cats, {
+    HealthEntry? entry,
+  }) async {
     if (cats.isEmpty) return;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AddEntrySheet(
-        catId: catId ?? cats.first.id,
+      builder: (_) => _EntrySheet(
+        catId: entry?.catId ?? cats.first.id,
         cats: cats,
-        widgetRef: ref,
+        entry: entry,
       ),
     );
   }
@@ -180,7 +175,7 @@ class _CatJournalView extends ConsumerWidget {
             data: (entries) => entries.isEmpty
                 ? SliverFillRemaining(
                     child: _EmptyState(
-                      onAdd: () => _showAddEntrySheet(context, ref),
+                      onAdd: () => _showEntrySheet(context),
                     ),
                   )
                 : SliverPadding(
@@ -192,9 +187,12 @@ class _CatJournalView extends ConsumerWidget {
                           catName: null,
                           isFirst: i == 0,
                           isLast: i == entries.length - 1,
-                          onDelete: () => ref
-                              .read(healthEntriesDaoProvider)
-                              .deleteEntry(entries[i].id),
+                          onTap: () =>
+                              _showEntrySheet(context, entry: entries[i]),
+                          onDelete: () => deleteEntry(
+                            ref.read(databaseProvider),
+                            entries[i],
+                          ),
                         ),
                         childCount: entries.length,
                       ),
@@ -210,22 +208,22 @@ class _CatJournalView extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddEntrySheet(context, ref),
+        onPressed: () => _showEntrySheet(context),
         icon: const Icon(Icons.add_a_photo_outlined),
         label: const Text('Ajouter une note'),
       ),
     );
   }
 
-  Future<void> _showAddEntrySheet(BuildContext context, WidgetRef ref) async {
+  Future<void> _showEntrySheet(BuildContext context, {HealthEntry? entry}) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AddEntrySheet(
+      builder: (_) => _EntrySheet(
         catId: catId,
         cats: const [],
-        widgetRef: ref,
+        entry: entry,
       ),
     );
   }
@@ -241,6 +239,7 @@ class _TimelineEntry extends StatelessWidget {
     required this.catName,
     required this.isFirst,
     required this.isLast,
+    required this.onTap,
     required this.onDelete,
   });
 
@@ -248,6 +247,7 @@ class _TimelineEntry extends StatelessWidget {
   final String? catName;
   final bool isFirst;
   final bool isLast;
+  final VoidCallback onTap;
   final VoidCallback onDelete;
 
   @override
@@ -279,10 +279,13 @@ class _TimelineEntry extends StatelessWidget {
                 top: isFirst ? 0 : 12,
                 bottom: isLast ? 0 : 16,
               ),
-              child: _EntryCard(
-                entry: entry,
-                catName: catName,
-                onDelete: onDelete,
+              child: GestureDetector(
+                onTap: onTap,
+                child: _EntryCard(
+                  entry: entry,
+                  catName: catName,
+                  onDelete: onDelete,
+                ),
               ),
             ),
           ),
@@ -508,40 +511,58 @@ class _EmptyState extends StatelessWidget {
 // Add entry bottom sheet
 // ---------------------------------------------------------------------------
 
-class _AddEntrySheet extends ConsumerStatefulWidget {
-  const _AddEntrySheet({
+class _EntrySheet extends ConsumerStatefulWidget {
+  const _EntrySheet({
     required this.catId,
     required this.cats,
-    required this.widgetRef,
+    this.entry,
   });
 
   final int catId;
   final List<Cat> cats;
-  final WidgetRef widgetRef;
+
+  /// Entry being edited; null to create a new one.
+  final HealthEntry? entry;
 
   @override
-  ConsumerState<_AddEntrySheet> createState() => _AddEntrySheetState();
+  ConsumerState<_EntrySheet> createState() => _EntrySheetState();
 }
 
-class _AddEntrySheetState extends ConsumerState<_AddEntrySheet> {
-  final _titleController = TextEditingController();
-  final _noteController = TextEditingController();
-  late int _selectedCatId;
-  HealthEntryType _type = HealthEntryType.note;
-  DateTime _date = DateTime.now();
+class _EntrySheetState extends ConsumerState<_EntrySheet> {
+  late final _titleController = TextEditingController(text: widget.entry?.title);
+  late final _noteController = TextEditingController(text: widget.entry?.note);
+  late int _selectedCatId = widget.catId;
+  late HealthEntryType _type = widget.entry?.type ?? HealthEntryType.note;
+  late DateTime _date = widget.entry?.date ?? DateTime.now();
+  late String? _photoPath = widget.entry?.photoPath;
   bool _saving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedCatId = widget.catId;
-  }
+  bool _saved = false;
 
   @override
   void dispose() {
+    // A photo picked in a sheet the user then dismissed would be orphaned.
+    if (!_saved && _photoPath != widget.entry?.photoPath) deletePhoto(_photoPath);
     _titleController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickPhoto() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final image = await pickPhoto(context, title: 'Photo de la note');
+      if (image == null) return;
+      final path = await savePhoto(image, prefix: 'entry');
+      if (_photoPath != widget.entry?.photoPath) await deletePhoto(_photoPath);
+      if (mounted) setState(() => _photoPath = path);
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Erreur photo : $e')));
+    }
+  }
+
+  Future<void> _removePhoto() async {
+    if (_photoPath != widget.entry?.photoPath) await deletePhoto(_photoPath);
+    setState(() => _photoPath = null);
   }
 
   Future<void> _save() async {
@@ -550,15 +571,25 @@ class _AddEntrySheetState extends ConsumerState<_AddEntrySheet> {
     setState(() => _saving = true);
 
     final note = _noteController.text.trim();
-    await widget.widgetRef.read(healthEntriesDaoProvider).insertEntry(
-          HealthEntriesCompanion(
-            catId: Value(_selectedCatId),
-            type: Value(_type),
-            date: Value(_date),
-            title: Value(title),
-            note: Value(note.isEmpty ? null : note),
-          ),
-        );
+    final dao = ref.read(healthEntriesDaoProvider);
+    final editing = widget.entry;
+    final data = HealthEntriesCompanion(
+      catId: Value(_selectedCatId),
+      type: Value(_type),
+      date: Value(_date),
+      title: Value(title),
+      note: Value(note.isEmpty ? null : note),
+      photoPath: Value(_photoPath),
+    );
+    if (editing == null) {
+      await dao.insertEntry(data);
+    } else {
+      await dao.updateEntry(
+        data.copyWith(id: Value(editing.id), createdAt: Value(editing.createdAt)),
+      );
+      if (editing.photoPath != _photoPath) await deletePhoto(editing.photoPath);
+    }
+    _saved = true;
 
     if (mounted) Navigator.pop(context);
   }
@@ -605,7 +636,10 @@ class _AddEntrySheetState extends ConsumerState<_AddEntrySheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Nouvelle entrée', style: theme.textTheme.headlineMedium),
+            Text(
+              widget.entry == null ? 'Nouvelle entrée' : 'Modifier l\'entrée',
+              style: theme.textTheme.headlineMedium,
+            ),
             const SizedBox(height: 24),
 
             // Cat picker (only when opened from the all-cats tab)
@@ -680,7 +714,7 @@ class _AddEntrySheetState extends ConsumerState<_AddEntrySheet> {
 
             TextField(
               controller: _titleController,
-              autofocus: true,
+              autofocus: widget.entry == null,
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
                 labelText: 'Titre *',
@@ -699,6 +733,35 @@ class _AddEntrySheetState extends ConsumerState<_AddEntrySheet> {
                 prefixIcon: Icon(Icons.notes),
                 alignLabelWithHint: true,
               ),
+            ),
+            const SizedBox(height: 16),
+
+            if (_photoPath != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  File(_photoPath!),
+                  height: 140,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            Row(
+              children: [
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.add_a_photo_outlined),
+                  label: Text(_photoPath == null ? 'Ajouter une photo' : 'Changer la photo'),
+                  onPressed: _pickPhoto,
+                ),
+                if (_photoPath != null)
+                  TextButton(
+                    onPressed: _removePhoto,
+                    child: const Text('Retirer'),
+                  ),
+              ],
             ),
             const SizedBox(height: 28),
 

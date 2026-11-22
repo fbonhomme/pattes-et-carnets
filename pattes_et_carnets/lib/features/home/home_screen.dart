@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pattes_et_carnets/features/home/home_provider.dart';
+import 'package:pattes_et_carnets/shared/providers/data_providers.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 import 'package:pattes_et_carnets/shared/providers/database_provider.dart';
+import 'package:pattes_et_carnets/shared/services/care_actions.dart';
 import 'package:pattes_et_carnets/shared/services/notification_service.dart';
 import 'package:pattes_et_carnets/shared/widgets/cat_card.dart';
 import 'package:drift/drift.dart' show Value;
@@ -35,13 +36,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: _buildAppBar(context, catsAsync.valueOrNull),
       body: catsAsync.when(
         data: (cats) => cats.isEmpty
-            ? _EmptyState(onAdd: () => _showAddCatSheet(context, ref))
+            ? _EmptyState(onAdd: () => _showAddCatSheet(context))
             : _CatList(cats: cats, weekCount: weekCountAsync.valueOrNull ?? 0),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erreur: $e')),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddCatSheet(context, ref),
+        onPressed: () => _showAddCatSheet(context),
         icon: const Icon(Icons.add),
         label: const Text('Ajouter un chat'),
       ),
@@ -70,12 +71,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Future<void> _showAddCatSheet(BuildContext context, WidgetRef ref) async {
+  Future<void> _showAddCatSheet(BuildContext context) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AddCatSheet(ref: ref),
+      builder: (_) => const _AddCatSheet(),
     );
   }
 }
@@ -161,6 +162,7 @@ class _CatList extends ConsumerWidget {
   }
 
   void _confirmDeleteCat(BuildContext context, Cat cat, WidgetRef ref) {
+    final db = ref.read(databaseProvider);
     showDialog<bool>(
       context: context,
       builder: (dialogCtx) {
@@ -187,21 +189,8 @@ class _CatList extends ConsumerWidget {
         );
       },
     ).then((confirmed) async {
-      if (confirmed == true && context.mounted) {
-        await _deleteCat(cat, ref);
-      }
+      if (confirmed == true) await deleteCat(db, cat);
     });
-  }
-
-  Future<void> _deleteCat(Cat cat, WidgetRef ref) async {
-    final reminders =
-        await ref.read(remindersDaoProvider).getPendingRemindersForCat(cat.id);
-    for (final r in reminders) {
-      await NotificationService.cancelReminder(r.id);
-    }
-    await ref.read(healthEntriesDaoProvider).deleteAllForCat(cat.id);
-    await ref.read(remindersDaoProvider).deleteAllForCat(cat.id);
-    await ref.read(catsDaoProvider).deleteCat(cat.id);
   }
 }
 
@@ -349,9 +338,7 @@ class _EmptyState extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _AddCatSheet extends ConsumerStatefulWidget {
-  const _AddCatSheet({required this.ref});
-
-  final WidgetRef ref;
+  const _AddCatSheet();
 
   @override
   ConsumerState<_AddCatSheet> createState() => _AddCatSheetState();
@@ -373,7 +360,7 @@ class _AddCatSheetState extends ConsumerState<_AddCatSheet> {
     if (name.isEmpty) return;
 
     setState(() => _saving = true);
-    final id = await widget.ref.read(catsDaoProvider).insertCat(
+    final id = await ref.read(catsDaoProvider).insertCat(
           CatsCompanion(
             name: Value(name),
             sex: Value(_sex),

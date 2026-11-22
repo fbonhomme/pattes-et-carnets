@@ -42,7 +42,7 @@ lib/
     │   └── daos/               # CatsDao, VetsDao, RemindersDao, HealthEntriesDao
     ├── models/                 # Enums (CatSex, ReminderType, HealthEntryType…)
     ├── providers/              # Providers Riverpod partagés
-    ├── services/               # NotificationService
+    ├── services/               # Notifications, photos, actions métier (care_actions)
     └── widgets/                # Composants réutilisables
 ```
 
@@ -52,7 +52,7 @@ lib/
 # Dépendances
 flutter pub get
 
-# Génération du code Drift + Riverpod
+# Génération du code Drift
 dart run build_runner build --delete-conflicting-outputs
 
 # Lancer en debug

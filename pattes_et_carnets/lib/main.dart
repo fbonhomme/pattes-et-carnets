@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:pattes_et_carnets/app/router.dart';
 import 'package:pattes_et_carnets/app/theme.dart';
-import 'package:pattes_et_carnets/shared/database/app_database.dart';
-import 'package:pattes_et_carnets/shared/database/database_seeder.dart';
+import 'package:pattes_et_carnets/shared/providers/database_provider.dart';
 import 'package:pattes_et_carnets/shared/services/notification_service.dart';
 
 void main() async {
@@ -12,21 +11,26 @@ void main() async {
   await initializeDateFormatting('fr', null);
   await NotificationService.init();
 
+  // One container so startup work and the UI share the same database.
+  final container = ProviderContainer();
   try {
-    final db = AppDatabase();
-    await DatabaseSeeder(db).seedIfEmpty();
-
+    final db = container.read(databaseProvider);
     // Reschedule pending reminders so notifications survive app restarts.
     final pendingReminders = await db.remindersDao.getPendingReminders();
     final cats = await db.catsDao.getAllCats();
     final catNames = {for (final c in cats) c.id: c.name};
     await NotificationService.rescheduleAll(pendingReminders, catNames);
-    await db.close();
-  } catch (_) {
+  } catch (e) {
     // Never block startup because of notification/DB errors.
+    debugPrint('Startup reschedule failed: $e');
   }
 
-  runApp(const ProviderScope(child: PattesEtCarnetsApp()));
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const PattesEtCarnetsApp(),
+    ),
+  );
 }
 
 class PattesEtCarnetsApp extends StatelessWidget {

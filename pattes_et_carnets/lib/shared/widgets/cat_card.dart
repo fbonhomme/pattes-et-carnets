@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pattes_et_carnets/app/theme.dart';
-import 'package:pattes_et_carnets/features/home/home_provider.dart';
+import 'package:pattes_et_carnets/shared/providers/data_providers.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 import 'package:pattes_et_carnets/shared/models/reminder_extensions.dart';
@@ -214,20 +214,12 @@ class _StatusBadge extends StatelessWidget {
     final r = reminder;
     if (r == null) return (Icons.verified, 'Tout est à jour');
 
-    final daysLeft = r.dueDate.difference(DateTime.now()).inDays;
-    final timeLabel = switch (daysLeft) {
-      < 0 => 'En retard',
-      0 => "Aujourd'hui",
-      1 => 'Demain',
-      _ => 'Dans $daysLeft jours',
-    };
-
     final icon = switch (status) {
       HealthStatus.late => Icons.warning_rounded,
       HealthStatus.upcoming => Icons.schedule,
       HealthStatus.upToDate => Icons.verified,
     };
 
-    return (icon, '${r.title} — $timeLabel');
+    return (icon, '${r.title} — ${r.dueLabel}');
   }
 }

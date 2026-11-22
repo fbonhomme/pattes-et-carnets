@@ -21,8 +21,9 @@ class NotificationService {
     try {
       final tzName = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(tzName));
-    } catch (_) {
+    } catch (e) {
       // Fallback to UTC if timezone detection fails (e.g. on Linux desktop)
+      debugPrint('NotificationService: timezone detection failed, using UTC ($e)');
     }
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -45,10 +46,16 @@ class NotificationService {
     );
   }
 
-  /// Request POST_NOTIFICATIONS permission (Android 13+).
+  static bool _permissionRequested = false;
+
+  /// Request POST_NOTIFICATIONS permission (Android 13+), once per launch.
   /// Must be called after runApp(), from a widget, so the Activity is fully visible.
   static Future<void> requestPermission() async {
-    if (defaultTargetPlatform != TargetPlatform.android) return;
+    if (_permissionRequested ||
+        defaultTargetPlatform != TargetPlatform.android) {
+      return;
+    }
+    _permissionRequested = true;
     try {
       await _plugin
           .resolvePlatformSpecificImplementation<
@@ -62,9 +69,7 @@ class NotificationService {
   static Future<void> scheduleReminder(Reminder reminder, String catName) async {
     if (reminder.isDone) return;
 
-    final due = reminder.dueDate;
-    // Fire at 9:00 AM on the due date
-    final scheduled = DateTime(due.year, due.month, due.day, 9, 0);
+    final scheduled = _fireTime(reminder);
     final now = DateTime.now();
 
     final details = NotificationDetails(
@@ -108,7 +113,7 @@ class NotificationService {
           body,
           tzScheduled,
           details,
-          androidScheduleMode: AndroidScheduleMode.inexact,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
         );
@@ -121,21 +126,24 @@ class NotificationService {
     await _plugin.cancel(reminderId);
   }
 
-  /// Cancel all scheduled notifications (call on full DB reset).
-  static Future<void> cancelAll() async {
-    await _plugin.cancelAll();
-  }
-
   /// Reschedule every pending reminder on startup (handles app restarts).
+  /// Overdue reminders were already shown when they fired — skip them so the
+  /// user isn't re-notified on every launch.
   static Future<void> rescheduleAll(
     List<Reminder> reminders,
     Map<int, String> catNames,
   ) async {
     await _plugin.cancelAll();
+    final now = DateTime.now();
     for (final r in reminders) {
+      if (_fireTime(r).isBefore(now)) continue;
       await scheduleReminder(r, catNames[r.catId] ?? '');
     }
   }
+
+  /// Notifications fire at 9:00 AM on the due date.
+  static DateTime _fireTime(Reminder r) =>
+      DateTime(r.dueDate.year, r.dueDate.month, r.dueDate.day, 9);
 
   static String _buildBody(
     ReminderType type,

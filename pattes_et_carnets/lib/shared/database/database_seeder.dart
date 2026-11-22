@@ -2,17 +2,14 @@ import 'package:drift/drift.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 
-/// Inserts sample data (Luna + Milo) if the database is empty.
-/// Called once at app startup.
+/// Inserts sample data (Luna + Milo).
+/// Called once, when a debug build creates the database.
 class DatabaseSeeder {
   const DatabaseSeeder(this._db);
 
   final AppDatabase _db;
 
-  Future<void> seedIfEmpty() async {
-    final cats = await _db.catsDao.watchAllCats().first;
-    if (cats.isNotEmpty) return;
-
+  Future<void> seed() async {
     // Vet
     final vetId = await _db.vetsDao.insertVet(
       const VetsCompanion(

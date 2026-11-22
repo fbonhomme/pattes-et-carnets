@@ -43,7 +43,4 @@ class RemindersDao extends DatabaseAccessor<AppDatabase>
 
   Future<int> deleteReminder(int id) =>
       (delete(reminders)..where((t) => t.id.equals(id))).go();
-
-  Future<int> deleteAllForCat(int catId) =>
-      (delete(reminders)..where((t) => t.catId.equals(catId))).go();
 }

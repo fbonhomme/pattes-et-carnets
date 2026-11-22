@@ -3,17 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:drift/drift.dart' show Value;
 
 import 'package:pattes_et_carnets/app/theme.dart';
-import 'package:pattes_et_carnets/features/home/home_provider.dart';
+import 'package:pattes_et_carnets/features/cat_profile/edit_cat_sheet.dart';
+import 'package:pattes_et_carnets/shared/providers/data_providers.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 import 'package:pattes_et_carnets/shared/models/reminder_extensions.dart';
-import 'package:pattes_et_carnets/shared/providers/database_provider.dart';
 
 // ---------------------------------------------------------------------------
 // Entry point
@@ -22,12 +18,11 @@ import 'package:pattes_et_carnets/shared/providers/database_provider.dart';
 class CatProfileScreen extends ConsumerWidget {
   const CatProfileScreen({super.key, required this.catId});
 
-  final String catId;
+  final int catId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final id = int.tryParse(catId) ?? 0;
-    final catAsync = ref.watch(catByIdProvider(id));
+    final catAsync = ref.watch(catByIdProvider(catId));
 
     return catAsync.when(
       data: (cat) {
@@ -81,7 +76,7 @@ class _CatProfileView extends ConsumerWidget {
               delegate: SliverChildListDelegate([
                 _QuickStats(cat: cat),
                 const SizedBox(height: 28),
-                _HealthSection(reminders: reminders, catId: cat.id),
+                _HealthSection(reminders: reminders),
                 const SizedBox(height: 28),
                 _RecentNotes(entries: entries, catId: cat.id),
               ]),
@@ -117,12 +112,12 @@ class _HeroSliverAppBar extends ConsumerWidget {
         IconButton(
           icon: const Icon(Icons.photo_camera_outlined),
           tooltip: 'Photo de profil',
-          onPressed: () => _showPhotoOptions(context, ref),
+          onPressed: () => changeCatPhoto(context, ref, cat.id),
         ),
         IconButton(
           icon: const Icon(Icons.edit_outlined),
           tooltip: 'Modifier',
-          onPressed: () => _showEditSheet(context, ref),
+          onPressed: () => _showEditSheet(context),
         ),
         IconButton(
           icon: const Icon(Icons.crisis_alert),
@@ -146,109 +141,19 @@ class _HeroSliverAppBar extends ConsumerWidget {
         stretchModes: const [StretchMode.zoomBackground],
         background: _HeroBackground(
           cat: cat,
-          onPhotoTap: () => _showPhotoOptions(context, ref),
+          onPhotoTap: () => changeCatPhoto(context, ref, cat.id),
         ),
       ),
     );
   }
 
-  void _showEditSheet(BuildContext context, WidgetRef ref) {
+  void _showEditSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _EditCatSheet(cat: cat, ref: ref),
+      builder: (_) => EditCatSheet(cat: cat),
     );
-  }
-
-  Future<void> _showPhotoOptions(BuildContext context, WidgetRef ref) async {
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        final scheme = Theme.of(ctx).colorScheme;
-        return Container(
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-          decoration: BoxDecoration(
-            color: scheme.surface,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: scheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text('Photo de profil', style: Theme.of(ctx).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: scheme.primaryContainer,
-                  child: Icon(Icons.camera_alt_outlined, color: scheme.onPrimaryContainer),
-                ),
-                title: const Text('Prendre une photo'),
-                onTap: () => Navigator.pop(ctx, ImageSource.camera),
-              ),
-              ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: scheme.secondaryContainer,
-                  child: Icon(Icons.photo_library_outlined, color: scheme.onSecondaryContainer),
-                ),
-                title: const Text('Choisir dans la galerie'),
-                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
-    );
-    if (source == null || !context.mounted) return;
-    await _pickPhoto(context, ref, source);
-  }
-
-  Future<void> _pickPhoto(BuildContext context, WidgetRef ref, ImageSource source) async {
-    try {
-      final picker = ImagePicker();
-      final image = await picker.pickImage(source: source, imageQuality: 85, maxWidth: 1200);
-      if (image == null) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Aucune photo reçue — réessayez')),
-          );
-        }
-        return;
-      }
-      final appDir = await getApplicationDocumentsDirectory();
-      final photosDir = Directory(p.join(appDir.path, 'cat_photos'));
-      await photosDir.create(recursive: true);
-      final dest = p.join(photosDir.path, 'cat_${cat.id}_${DateTime.now().millisecondsSinceEpoch}.jpg');
-      await File(image.path).copy(dest);
-      if (cat.photoPath != null && cat.photoPath!.isNotEmpty) {
-        try { await File(cat.photoPath!).delete(); } catch (_) {}
-      }
-      await ref.read(catsDaoProvider).updateCat(
-        CatsCompanion(id: Value(cat.id), photoPath: Value(dest)),
-      );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Photo enregistrée ✓'), duration: Duration(seconds: 2)),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur photo : $e')),
-        );
-      }
-    }
   }
 }
 
@@ -414,10 +319,9 @@ class _StatTile extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _HealthSection extends StatelessWidget {
-  const _HealthSection({required this.reminders, required this.catId});
+  const _HealthSection({required this.reminders});
 
   final List<Reminder> reminders;
-  final int catId;
 
   @override
   Widget build(BuildContext context) {
@@ -442,7 +346,7 @@ class _HealthSection extends StatelessWidget {
         else
           ...reminders.map((r) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: _ReminderCard(reminder: r, catId: catId),
+                child: _ReminderCard(reminder: r),
               )),
       ],
     );
@@ -506,10 +410,9 @@ class _UpToDateBanner extends StatelessWidget {
 }
 
 class _ReminderCard extends StatelessWidget {
-  const _ReminderCard({required this.reminder, required this.catId});
+  const _ReminderCard({required this.reminder});
 
   final Reminder reminder;
-  final int catId;
 
   @override
   Widget build(BuildContext context) {
@@ -518,14 +421,6 @@ class _ReminderCard extends StatelessWidget {
     final status = reminder.healthStatus;
     final color = status.statusColor(scheme);
     final containerColor = status.statusContainerColor(scheme);
-    final daysLeft = reminder.dueDate.difference(DateTime.now()).inDays;
-
-    final chipLabel = switch (daysLeft) {
-      < 0 => 'En retard',
-      0 => "Aujourd'hui",
-      1 => 'Demain',
-      _ => 'Dans $daysLeft j.',
-    };
 
     return Container(
       decoration: BoxDecoration(
@@ -571,7 +466,7 @@ class _ReminderCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(9999),
             ),
             child: Text(
-              chipLabel,
+              reminder.dueLabel,
               style: TextStyle(
                   color: color, fontWeight: FontWeight.w600, fontSize: 12),
             ),
@@ -701,450 +596,6 @@ class _NoteCard extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Edit cat bottom sheet
-// ---------------------------------------------------------------------------
-
-class _EditCatSheet extends ConsumerStatefulWidget {
-  const _EditCatSheet({required this.cat, required this.ref});
-
-  final Cat cat;
-  final WidgetRef ref;
-
-  @override
-  ConsumerState<_EditCatSheet> createState() => _EditCatSheetState();
-}
-
-class _EditCatSheetState extends ConsumerState<_EditCatSheet> {
-  late final _nameCtrl = TextEditingController(text: widget.cat.name);
-  late final _breedCtrl = TextEditingController(text: widget.cat.breed ?? '');
-  late final _weightCtrl = TextEditingController(
-    text: widget.cat.weightKg?.toString() ?? '',
-  );
-  late final _chipCtrl =
-      TextEditingController(text: widget.cat.chipNumber ?? '');
-  late final _bloodTypeCtrl =
-      TextEditingController(text: widget.cat.bloodType ?? '');
-
-  late CatSex _sex = widget.cat.sex;
-  late DateTime? _birthDate = widget.cat.birthDate;
-  late final List<String> _allergies = List<String>.from(widget.cat.allergies);
-  late int? _selectedVetId = widget.cat.vetId;
-  bool _saving = false;
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _breedCtrl.dispose();
-    _weightCtrl.dispose();
-    _chipCtrl.dispose();
-    _bloodTypeCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickPhotoFromSheet(BuildContext ctx) async {
-    final source = await showModalBottomSheet<ImageSource>(
-      context: ctx,
-      backgroundColor: Colors.transparent,
-      builder: (bsCtx) {
-        final scheme = Theme.of(bsCtx).colorScheme;
-        return Container(
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-          decoration: BoxDecoration(
-            color: scheme.surface,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: scheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text('Photo de profil', style: Theme.of(bsCtx).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: scheme.primaryContainer,
-                  child: Icon(Icons.camera_alt_outlined, color: scheme.onPrimaryContainer),
-                ),
-                title: const Text('Prendre une photo'),
-                onTap: () => Navigator.pop(bsCtx, ImageSource.camera),
-              ),
-              ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: scheme.secondaryContainer,
-                  child: Icon(Icons.photo_library_outlined, color: scheme.onSecondaryContainer),
-                ),
-                title: const Text('Choisir dans la galerie'),
-                onTap: () => Navigator.pop(bsCtx, ImageSource.gallery),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
-    );
-    if (source == null || !ctx.mounted) return;
-    try {
-      final picker = ImagePicker();
-      final image = await picker.pickImage(source: source, imageQuality: 85, maxWidth: 1200);
-      if (image == null) {
-        if (ctx.mounted) {
-          ScaffoldMessenger.of(ctx).showSnackBar(
-            const SnackBar(content: Text('Aucune photo reçue — réessayez')),
-          );
-        }
-        return;
-      }
-      final appDir = await getApplicationDocumentsDirectory();
-      final photosDir = Directory(p.join(appDir.path, 'cat_photos'));
-      await photosDir.create(recursive: true);
-      final dest = p.join(photosDir.path, 'cat_${widget.cat.id}_${DateTime.now().millisecondsSinceEpoch}.jpg');
-      await File(image.path).copy(dest);
-      if (widget.cat.photoPath != null && widget.cat.photoPath!.isNotEmpty) {
-        try { await File(widget.cat.photoPath!).delete(); } catch (_) {}
-      }
-      await ref.read(catsDaoProvider).updateCat(
-        CatsCompanion(id: Value(widget.cat.id), photoPath: Value(dest)),
-      );
-      if (ctx.mounted) Navigator.pop(ctx);
-    } catch (e) {
-      if (ctx.mounted) {
-        ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text('Erreur photo : $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _save() async {
-    final name = _nameCtrl.text.trim();
-    if (name.isEmpty) return;
-    setState(() => _saving = true);
-
-    await ref.read(catsDaoProvider).updateCat(
-          CatsCompanion(
-            id: Value(widget.cat.id),
-            name: Value(name),
-            breed: Value(_breedCtrl.text.trim().isEmpty
-                ? null
-                : _breedCtrl.text.trim()),
-            sex: Value(_sex),
-            birthDate: Value(_birthDate),
-            weightKg: Value(double.tryParse(_weightCtrl.text.trim())),
-            chipNumber: Value(_chipCtrl.text.trim().isEmpty
-                ? null
-                : _chipCtrl.text.trim()),
-            bloodType: Value(_bloodTypeCtrl.text.trim().isEmpty
-                ? null
-                : _bloodTypeCtrl.text.trim()),
-            allergies: Value(_allergies),
-            vetId: Value(_selectedVetId),
-          ),
-        );
-
-    if (mounted) Navigator.pop(context);
-  }
-
-  Future<void> _addAllergen() async {
-    String? value;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        final ctrl = TextEditingController();
-        return AlertDialog(
-          title: const Text('Nouvelle allergie'),
-          content: TextField(
-            controller: ctrl,
-            autofocus: true,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(hintText: 'Ex: Poulet, Poisson…'),
-            onSubmitted: (_) {
-              value = ctrl.text.trim();
-              Navigator.pop(ctx);
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Annuler'),
-            ),
-            FilledButton(
-              onPressed: () {
-                value = ctrl.text.trim();
-                Navigator.pop(ctx);
-              },
-              child: const Text('Ajouter'),
-            ),
-          ],
-        );
-      },
-    );
-    if (value != null && value!.isNotEmpty && !_allergies.contains(value)) {
-      setState(() => _allergies.add(value!));
-    }
-  }
-
-  Future<void> _addVet() async {
-    final nameCtrl = TextEditingController();
-    final clinicCtrl = TextEditingController();
-    final phoneCtrl = TextEditingController();
-    int? newId;
-
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Nouveau vétérinaire'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameCtrl,
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Nom *'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: clinicCtrl,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Clinique'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: phoneCtrl,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Téléphone',
-                prefixIcon: Icon(Icons.phone_outlined),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final name = nameCtrl.text.trim();
-              if (name.isEmpty) return;
-              newId = await ref.read(vetsDaoProvider).insertVet(
-                    VetsCompanion(
-                      name: Value(name),
-                      clinic: Value(clinicCtrl.text.trim().isEmpty
-                          ? null
-                          : clinicCtrl.text.trim()),
-                      phone: Value(phoneCtrl.text.trim()),
-                    ),
-                  );
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            child: const Text('Créer'),
-          ),
-        ],
-      ),
-    );
-
-    nameCtrl.dispose();
-    clinicCtrl.dispose();
-    phoneCtrl.dispose();
-
-    if (newId != null && mounted) {
-      setState(() => _selectedVetId = newId);
-    }
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _birthDate ?? DateTime.now().subtract(const Duration(days: 365)),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-      helpText: 'Date de naissance',
-    );
-    if (picked != null) setState(() => _birthDate = picked);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final vetsAsync = ref.watch(allVetsProvider);
-    final birthLabel = _birthDate != null
-        ? '${_birthDate!.day.toString().padLeft(2, '0')}/${_birthDate!.month.toString().padLeft(2, '0')}/${_birthDate!.year}'
-        : 'Choisir une date';
-
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.fromLTRB(
-          24, 16, 24, MediaQuery.viewInsetsOf(context).bottom + 24),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                    color: scheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2)),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text('Modifier le profil', style: theme.textTheme.headlineMedium),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.photo_camera_outlined),
-              label: Text(widget.cat.photoPath != null ? 'Changer la photo' : 'Ajouter une photo'),
-              onPressed: () => _pickPhotoFromSheet(context),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _nameCtrl,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Nom *', prefixIcon: Icon(Icons.pets)),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _breedCtrl,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Race'),
-            ),
-            const SizedBox(height: 14),
-            Row(children: [
-              Expanded(
-                child: TextField(
-                  controller: _weightCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Poids (kg)', prefixIcon: Icon(Icons.monitor_weight_outlined)),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _bloodTypeCtrl,
-                  decoration: const InputDecoration(labelText: 'Groupe sanguin'),
-                ),
-              ),
-            ]),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _chipCtrl,
-              decoration: const InputDecoration(labelText: 'N° de puce', prefixIcon: Icon(Icons.tag)),
-            ),
-            const SizedBox(height: 20),
-            Text('Sexe', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            SegmentedButton<CatSex>(
-              segments: const [
-                ButtonSegment(value: CatSex.female, label: Text('Femelle'), icon: Icon(Icons.female)),
-                ButtonSegment(value: CatSex.male, label: Text('Mâle'), icon: Icon(Icons.male)),
-              ],
-              selected: {_sex},
-              onSelectionChanged: (s) => setState(() => _sex = s.first),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.cake_outlined),
-              title: const Text('Date de naissance'),
-              subtitle: Text(birthLabel),
-              onTap: _pickDate,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: scheme.outlineVariant)),
-            ),
-            const SizedBox(height: 20),
-            Text('Allergies', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                for (final allergen in _allergies)
-                  Chip(
-                    label: Text(allergen),
-                    deleteIcon: const Icon(Icons.close, size: 18),
-                    onDeleted: () =>
-                        setState(() => _allergies.remove(allergen)),
-                  ),
-                ActionChip(
-                  avatar: const Icon(Icons.add, size: 18),
-                  label: const Text('Ajouter'),
-                  onPressed: _addAllergen,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text('Vétérinaire', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            vetsAsync.when(
-              data: (vets) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      ChoiceChip(
-                        label: const Text('Aucun'),
-                        selected: _selectedVetId == null,
-                        onSelected: (_) =>
-                            setState(() => _selectedVetId = null),
-                      ),
-                      for (final vet in vets)
-                        ChoiceChip(
-                          label: Text(vet.name),
-                          selected: _selectedVetId == vet.id,
-                          onSelected: (_) =>
-                              setState(() => _selectedVetId = vet.id),
-                        ),
-                    ],
-                  ),
-                  TextButton.icon(
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Nouveau véto'),
-                    onPressed: _addVet,
-                  ),
-                ],
-              ),
-              loading: () => const SizedBox(
-                height: 32,
-                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              ),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _saving ? null : _save,
-                child: _saving
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Enregistrer'),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -3,650 +3,6 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $CatsTable extends Cats with TableInfo<$CatsTable, Cat> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $CatsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-    'name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _breedMeta = const VerificationMeta('breed');
-  @override
-  late final GeneratedColumn<String> breed = GeneratedColumn<String>(
-    'breed',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  @override
-  late final GeneratedColumnWithTypeConverter<CatSex, String> sex =
-      GeneratedColumn<String>(
-        'sex',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('female'),
-      ).withConverter<CatSex>($CatsTable.$convertersex);
-  static const VerificationMeta _birthDateMeta = const VerificationMeta(
-    'birthDate',
-  );
-  @override
-  late final GeneratedColumn<DateTime> birthDate = GeneratedColumn<DateTime>(
-    'birth_date',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _weightKgMeta = const VerificationMeta(
-    'weightKg',
-  );
-  @override
-  late final GeneratedColumn<double> weightKg = GeneratedColumn<double>(
-    'weight_kg',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _chipNumberMeta = const VerificationMeta(
-    'chipNumber',
-  );
-  @override
-  late final GeneratedColumn<String> chipNumber = GeneratedColumn<String>(
-    'chip_number',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _photoPathMeta = const VerificationMeta(
-    'photoPath',
-  );
-  @override
-  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
-    'photo_path',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _bloodTypeMeta = const VerificationMeta(
-    'bloodType',
-  );
-  @override
-  late final GeneratedColumn<String> bloodType = GeneratedColumn<String>(
-    'blood_type',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String> allergies =
-      GeneratedColumn<String>(
-        'allergies',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('[]'),
-      ).withConverter<List<String>>($CatsTable.$converterallergies);
-  static const VerificationMeta _vetIdMeta = const VerificationMeta('vetId');
-  @override
-  late final GeneratedColumn<int> vetId = GeneratedColumn<int>(
-    'vet_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    name,
-    breed,
-    sex,
-    birthDate,
-    weightKg,
-    chipNumber,
-    photoPath,
-    bloodType,
-    allergies,
-    vetId,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'cats';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<Cat> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-        _nameMeta,
-        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('breed')) {
-      context.handle(
-        _breedMeta,
-        breed.isAcceptableOrUnknown(data['breed']!, _breedMeta),
-      );
-    }
-    if (data.containsKey('birth_date')) {
-      context.handle(
-        _birthDateMeta,
-        birthDate.isAcceptableOrUnknown(data['birth_date']!, _birthDateMeta),
-      );
-    }
-    if (data.containsKey('weight_kg')) {
-      context.handle(
-        _weightKgMeta,
-        weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
-      );
-    }
-    if (data.containsKey('chip_number')) {
-      context.handle(
-        _chipNumberMeta,
-        chipNumber.isAcceptableOrUnknown(data['chip_number']!, _chipNumberMeta),
-      );
-    }
-    if (data.containsKey('photo_path')) {
-      context.handle(
-        _photoPathMeta,
-        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
-      );
-    }
-    if (data.containsKey('blood_type')) {
-      context.handle(
-        _bloodTypeMeta,
-        bloodType.isAcceptableOrUnknown(data['blood_type']!, _bloodTypeMeta),
-      );
-    }
-    if (data.containsKey('vet_id')) {
-      context.handle(
-        _vetIdMeta,
-        vetId.isAcceptableOrUnknown(data['vet_id']!, _vetIdMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Cat map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Cat(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
-      breed: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}breed'],
-      ),
-      sex: $CatsTable.$convertersex.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}sex'],
-        )!,
-      ),
-      birthDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}birth_date'],
-      ),
-      weightKg: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}weight_kg'],
-      ),
-      chipNumber: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}chip_number'],
-      ),
-      photoPath: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}photo_path'],
-      ),
-      bloodType: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}blood_type'],
-      ),
-      allergies: $CatsTable.$converterallergies.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}allergies'],
-        )!,
-      ),
-      vetId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}vet_id'],
-      ),
-    );
-  }
-
-  @override
-  $CatsTable createAlias(String alias) {
-    return $CatsTable(attachedDatabase, alias);
-  }
-
-  static TypeConverter<CatSex, String> $convertersex = const CatSexConverter();
-  static TypeConverter<List<String>, String> $converterallergies =
-      const StringListConverter();
-}
-
-class Cat extends DataClass implements Insertable<Cat> {
-  final int id;
-  final String name;
-  final String? breed;
-  final CatSex sex;
-  final DateTime? birthDate;
-  final double? weightKg;
-  final String? chipNumber;
-  final String? photoPath;
-  final String? bloodType;
-  final List<String> allergies;
-  final int? vetId;
-  const Cat({
-    required this.id,
-    required this.name,
-    this.breed,
-    required this.sex,
-    this.birthDate,
-    this.weightKg,
-    this.chipNumber,
-    this.photoPath,
-    this.bloodType,
-    required this.allergies,
-    this.vetId,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
-    if (!nullToAbsent || breed != null) {
-      map['breed'] = Variable<String>(breed);
-    }
-    {
-      map['sex'] = Variable<String>($CatsTable.$convertersex.toSql(sex));
-    }
-    if (!nullToAbsent || birthDate != null) {
-      map['birth_date'] = Variable<DateTime>(birthDate);
-    }
-    if (!nullToAbsent || weightKg != null) {
-      map['weight_kg'] = Variable<double>(weightKg);
-    }
-    if (!nullToAbsent || chipNumber != null) {
-      map['chip_number'] = Variable<String>(chipNumber);
-    }
-    if (!nullToAbsent || photoPath != null) {
-      map['photo_path'] = Variable<String>(photoPath);
-    }
-    if (!nullToAbsent || bloodType != null) {
-      map['blood_type'] = Variable<String>(bloodType);
-    }
-    {
-      map['allergies'] = Variable<String>(
-        $CatsTable.$converterallergies.toSql(allergies),
-      );
-    }
-    if (!nullToAbsent || vetId != null) {
-      map['vet_id'] = Variable<int>(vetId);
-    }
-    return map;
-  }
-
-  CatsCompanion toCompanion(bool nullToAbsent) {
-    return CatsCompanion(
-      id: Value(id),
-      name: Value(name),
-      breed: breed == null && nullToAbsent
-          ? const Value.absent()
-          : Value(breed),
-      sex: Value(sex),
-      birthDate: birthDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(birthDate),
-      weightKg: weightKg == null && nullToAbsent
-          ? const Value.absent()
-          : Value(weightKg),
-      chipNumber: chipNumber == null && nullToAbsent
-          ? const Value.absent()
-          : Value(chipNumber),
-      photoPath: photoPath == null && nullToAbsent
-          ? const Value.absent()
-          : Value(photoPath),
-      bloodType: bloodType == null && nullToAbsent
-          ? const Value.absent()
-          : Value(bloodType),
-      allergies: Value(allergies),
-      vetId: vetId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(vetId),
-    );
-  }
-
-  factory Cat.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Cat(
-      id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      breed: serializer.fromJson<String?>(json['breed']),
-      sex: serializer.fromJson<CatSex>(json['sex']),
-      birthDate: serializer.fromJson<DateTime?>(json['birthDate']),
-      weightKg: serializer.fromJson<double?>(json['weightKg']),
-      chipNumber: serializer.fromJson<String?>(json['chipNumber']),
-      photoPath: serializer.fromJson<String?>(json['photoPath']),
-      bloodType: serializer.fromJson<String?>(json['bloodType']),
-      allergies: serializer.fromJson<List<String>>(json['allergies']),
-      vetId: serializer.fromJson<int?>(json['vetId']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
-      'breed': serializer.toJson<String?>(breed),
-      'sex': serializer.toJson<CatSex>(sex),
-      'birthDate': serializer.toJson<DateTime?>(birthDate),
-      'weightKg': serializer.toJson<double?>(weightKg),
-      'chipNumber': serializer.toJson<String?>(chipNumber),
-      'photoPath': serializer.toJson<String?>(photoPath),
-      'bloodType': serializer.toJson<String?>(bloodType),
-      'allergies': serializer.toJson<List<String>>(allergies),
-      'vetId': serializer.toJson<int?>(vetId),
-    };
-  }
-
-  Cat copyWith({
-    int? id,
-    String? name,
-    Value<String?> breed = const Value.absent(),
-    CatSex? sex,
-    Value<DateTime?> birthDate = const Value.absent(),
-    Value<double?> weightKg = const Value.absent(),
-    Value<String?> chipNumber = const Value.absent(),
-    Value<String?> photoPath = const Value.absent(),
-    Value<String?> bloodType = const Value.absent(),
-    List<String>? allergies,
-    Value<int?> vetId = const Value.absent(),
-  }) => Cat(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    breed: breed.present ? breed.value : this.breed,
-    sex: sex ?? this.sex,
-    birthDate: birthDate.present ? birthDate.value : this.birthDate,
-    weightKg: weightKg.present ? weightKg.value : this.weightKg,
-    chipNumber: chipNumber.present ? chipNumber.value : this.chipNumber,
-    photoPath: photoPath.present ? photoPath.value : this.photoPath,
-    bloodType: bloodType.present ? bloodType.value : this.bloodType,
-    allergies: allergies ?? this.allergies,
-    vetId: vetId.present ? vetId.value : this.vetId,
-  );
-  Cat copyWithCompanion(CatsCompanion data) {
-    return Cat(
-      id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
-      breed: data.breed.present ? data.breed.value : this.breed,
-      sex: data.sex.present ? data.sex.value : this.sex,
-      birthDate: data.birthDate.present ? data.birthDate.value : this.birthDate,
-      weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
-      chipNumber: data.chipNumber.present
-          ? data.chipNumber.value
-          : this.chipNumber,
-      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
-      bloodType: data.bloodType.present ? data.bloodType.value : this.bloodType,
-      allergies: data.allergies.present ? data.allergies.value : this.allergies,
-      vetId: data.vetId.present ? data.vetId.value : this.vetId,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Cat(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('breed: $breed, ')
-          ..write('sex: $sex, ')
-          ..write('birthDate: $birthDate, ')
-          ..write('weightKg: $weightKg, ')
-          ..write('chipNumber: $chipNumber, ')
-          ..write('photoPath: $photoPath, ')
-          ..write('bloodType: $bloodType, ')
-          ..write('allergies: $allergies, ')
-          ..write('vetId: $vetId')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    name,
-    breed,
-    sex,
-    birthDate,
-    weightKg,
-    chipNumber,
-    photoPath,
-    bloodType,
-    allergies,
-    vetId,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Cat &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.breed == this.breed &&
-          other.sex == this.sex &&
-          other.birthDate == this.birthDate &&
-          other.weightKg == this.weightKg &&
-          other.chipNumber == this.chipNumber &&
-          other.photoPath == this.photoPath &&
-          other.bloodType == this.bloodType &&
-          other.allergies == this.allergies &&
-          other.vetId == this.vetId);
-}
-
-class CatsCompanion extends UpdateCompanion<Cat> {
-  final Value<int> id;
-  final Value<String> name;
-  final Value<String?> breed;
-  final Value<CatSex> sex;
-  final Value<DateTime?> birthDate;
-  final Value<double?> weightKg;
-  final Value<String?> chipNumber;
-  final Value<String?> photoPath;
-  final Value<String?> bloodType;
-  final Value<List<String>> allergies;
-  final Value<int?> vetId;
-  const CatsCompanion({
-    this.id = const Value.absent(),
-    this.name = const Value.absent(),
-    this.breed = const Value.absent(),
-    this.sex = const Value.absent(),
-    this.birthDate = const Value.absent(),
-    this.weightKg = const Value.absent(),
-    this.chipNumber = const Value.absent(),
-    this.photoPath = const Value.absent(),
-    this.bloodType = const Value.absent(),
-    this.allergies = const Value.absent(),
-    this.vetId = const Value.absent(),
-  });
-  CatsCompanion.insert({
-    this.id = const Value.absent(),
-    required String name,
-    this.breed = const Value.absent(),
-    this.sex = const Value.absent(),
-    this.birthDate = const Value.absent(),
-    this.weightKg = const Value.absent(),
-    this.chipNumber = const Value.absent(),
-    this.photoPath = const Value.absent(),
-    this.bloodType = const Value.absent(),
-    this.allergies = const Value.absent(),
-    this.vetId = const Value.absent(),
-  }) : name = Value(name);
-  static Insertable<Cat> custom({
-    Expression<int>? id,
-    Expression<String>? name,
-    Expression<String>? breed,
-    Expression<String>? sex,
-    Expression<DateTime>? birthDate,
-    Expression<double>? weightKg,
-    Expression<String>? chipNumber,
-    Expression<String>? photoPath,
-    Expression<String>? bloodType,
-    Expression<String>? allergies,
-    Expression<int>? vetId,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (name != null) 'name': name,
-      if (breed != null) 'breed': breed,
-      if (sex != null) 'sex': sex,
-      if (birthDate != null) 'birth_date': birthDate,
-      if (weightKg != null) 'weight_kg': weightKg,
-      if (chipNumber != null) 'chip_number': chipNumber,
-      if (photoPath != null) 'photo_path': photoPath,
-      if (bloodType != null) 'blood_type': bloodType,
-      if (allergies != null) 'allergies': allergies,
-      if (vetId != null) 'vet_id': vetId,
-    });
-  }
-
-  CatsCompanion copyWith({
-    Value<int>? id,
-    Value<String>? name,
-    Value<String?>? breed,
-    Value<CatSex>? sex,
-    Value<DateTime?>? birthDate,
-    Value<double?>? weightKg,
-    Value<String?>? chipNumber,
-    Value<String?>? photoPath,
-    Value<String?>? bloodType,
-    Value<List<String>>? allergies,
-    Value<int?>? vetId,
-  }) {
-    return CatsCompanion(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      breed: breed ?? this.breed,
-      sex: sex ?? this.sex,
-      birthDate: birthDate ?? this.birthDate,
-      weightKg: weightKg ?? this.weightKg,
-      chipNumber: chipNumber ?? this.chipNumber,
-      photoPath: photoPath ?? this.photoPath,
-      bloodType: bloodType ?? this.bloodType,
-      allergies: allergies ?? this.allergies,
-      vetId: vetId ?? this.vetId,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (breed.present) {
-      map['breed'] = Variable<String>(breed.value);
-    }
-    if (sex.present) {
-      map['sex'] = Variable<String>($CatsTable.$convertersex.toSql(sex.value));
-    }
-    if (birthDate.present) {
-      map['birth_date'] = Variable<DateTime>(birthDate.value);
-    }
-    if (weightKg.present) {
-      map['weight_kg'] = Variable<double>(weightKg.value);
-    }
-    if (chipNumber.present) {
-      map['chip_number'] = Variable<String>(chipNumber.value);
-    }
-    if (photoPath.present) {
-      map['photo_path'] = Variable<String>(photoPath.value);
-    }
-    if (bloodType.present) {
-      map['blood_type'] = Variable<String>(bloodType.value);
-    }
-    if (allergies.present) {
-      map['allergies'] = Variable<String>(
-        $CatsTable.$converterallergies.toSql(allergies.value),
-      );
-    }
-    if (vetId.present) {
-      map['vet_id'] = Variable<int>(vetId.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CatsCompanion(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('breed: $breed, ')
-          ..write('sex: $sex, ')
-          ..write('birthDate: $birthDate, ')
-          ..write('weightKg: $weightKg, ')
-          ..write('chipNumber: $chipNumber, ')
-          ..write('photoPath: $photoPath, ')
-          ..write('bloodType: $bloodType, ')
-          ..write('allergies: $allergies, ')
-          ..write('vetId: $vetId')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $VetsTable extends Vets with TableInfo<$VetsTable, Vet> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -941,6 +297,656 @@ class VetsCompanion extends UpdateCompanion<Vet> {
   }
 }
 
+class $CatsTable extends Cats with TableInfo<$CatsTable, Cat> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CatsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _breedMeta = const VerificationMeta('breed');
+  @override
+  late final GeneratedColumn<String> breed = GeneratedColumn<String>(
+    'breed',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<CatSex, String> sex =
+      GeneratedColumn<String>(
+        'sex',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('female'),
+      ).withConverter<CatSex>($CatsTable.$convertersex);
+  static const VerificationMeta _birthDateMeta = const VerificationMeta(
+    'birthDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> birthDate = GeneratedColumn<DateTime>(
+    'birth_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _weightKgMeta = const VerificationMeta(
+    'weightKg',
+  );
+  @override
+  late final GeneratedColumn<double> weightKg = GeneratedColumn<double>(
+    'weight_kg',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _chipNumberMeta = const VerificationMeta(
+    'chipNumber',
+  );
+  @override
+  late final GeneratedColumn<String> chipNumber = GeneratedColumn<String>(
+    'chip_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bloodTypeMeta = const VerificationMeta(
+    'bloodType',
+  );
+  @override
+  late final GeneratedColumn<String> bloodType = GeneratedColumn<String>(
+    'blood_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> allergies =
+      GeneratedColumn<String>(
+        'allergies',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      ).withConverter<List<String>>($CatsTable.$converterallergies);
+  static const VerificationMeta _vetIdMeta = const VerificationMeta('vetId');
+  @override
+  late final GeneratedColumn<int> vetId = GeneratedColumn<int>(
+    'vet_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES vets (id) ON DELETE SET NULL',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    breed,
+    sex,
+    birthDate,
+    weightKg,
+    chipNumber,
+    photoPath,
+    bloodType,
+    allergies,
+    vetId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'cats';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Cat> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('breed')) {
+      context.handle(
+        _breedMeta,
+        breed.isAcceptableOrUnknown(data['breed']!, _breedMeta),
+      );
+    }
+    if (data.containsKey('birth_date')) {
+      context.handle(
+        _birthDateMeta,
+        birthDate.isAcceptableOrUnknown(data['birth_date']!, _birthDateMeta),
+      );
+    }
+    if (data.containsKey('weight_kg')) {
+      context.handle(
+        _weightKgMeta,
+        weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
+      );
+    }
+    if (data.containsKey('chip_number')) {
+      context.handle(
+        _chipNumberMeta,
+        chipNumber.isAcceptableOrUnknown(data['chip_number']!, _chipNumberMeta),
+      );
+    }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    }
+    if (data.containsKey('blood_type')) {
+      context.handle(
+        _bloodTypeMeta,
+        bloodType.isAcceptableOrUnknown(data['blood_type']!, _bloodTypeMeta),
+      );
+    }
+    if (data.containsKey('vet_id')) {
+      context.handle(
+        _vetIdMeta,
+        vetId.isAcceptableOrUnknown(data['vet_id']!, _vetIdMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Cat map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Cat(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      breed: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}breed'],
+      ),
+      sex: $CatsTable.$convertersex.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}sex'],
+        )!,
+      ),
+      birthDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}birth_date'],
+      ),
+      weightKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}weight_kg'],
+      ),
+      chipNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chip_number'],
+      ),
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      ),
+      bloodType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}blood_type'],
+      ),
+      allergies: $CatsTable.$converterallergies.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}allergies'],
+        )!,
+      ),
+      vetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}vet_id'],
+      ),
+    );
+  }
+
+  @override
+  $CatsTable createAlias(String alias) {
+    return $CatsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<CatSex, String, String> $convertersex =
+      const EnumNameConverter<CatSex>(CatSex.values);
+  static TypeConverter<List<String>, String> $converterallergies =
+      const StringListConverter();
+}
+
+class Cat extends DataClass implements Insertable<Cat> {
+  final int id;
+  final String name;
+  final String? breed;
+  final CatSex sex;
+  final DateTime? birthDate;
+  final double? weightKg;
+  final String? chipNumber;
+  final String? photoPath;
+  final String? bloodType;
+  final List<String> allergies;
+  final int? vetId;
+  const Cat({
+    required this.id,
+    required this.name,
+    this.breed,
+    required this.sex,
+    this.birthDate,
+    this.weightKg,
+    this.chipNumber,
+    this.photoPath,
+    this.bloodType,
+    required this.allergies,
+    this.vetId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || breed != null) {
+      map['breed'] = Variable<String>(breed);
+    }
+    {
+      map['sex'] = Variable<String>($CatsTable.$convertersex.toSql(sex));
+    }
+    if (!nullToAbsent || birthDate != null) {
+      map['birth_date'] = Variable<DateTime>(birthDate);
+    }
+    if (!nullToAbsent || weightKg != null) {
+      map['weight_kg'] = Variable<double>(weightKg);
+    }
+    if (!nullToAbsent || chipNumber != null) {
+      map['chip_number'] = Variable<String>(chipNumber);
+    }
+    if (!nullToAbsent || photoPath != null) {
+      map['photo_path'] = Variable<String>(photoPath);
+    }
+    if (!nullToAbsent || bloodType != null) {
+      map['blood_type'] = Variable<String>(bloodType);
+    }
+    {
+      map['allergies'] = Variable<String>(
+        $CatsTable.$converterallergies.toSql(allergies),
+      );
+    }
+    if (!nullToAbsent || vetId != null) {
+      map['vet_id'] = Variable<int>(vetId);
+    }
+    return map;
+  }
+
+  CatsCompanion toCompanion(bool nullToAbsent) {
+    return CatsCompanion(
+      id: Value(id),
+      name: Value(name),
+      breed: breed == null && nullToAbsent
+          ? const Value.absent()
+          : Value(breed),
+      sex: Value(sex),
+      birthDate: birthDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(birthDate),
+      weightKg: weightKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weightKg),
+      chipNumber: chipNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(chipNumber),
+      photoPath: photoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoPath),
+      bloodType: bloodType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bloodType),
+      allergies: Value(allergies),
+      vetId: vetId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(vetId),
+    );
+  }
+
+  factory Cat.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Cat(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      breed: serializer.fromJson<String?>(json['breed']),
+      sex: $CatsTable.$convertersex.fromJson(
+        serializer.fromJson<String>(json['sex']),
+      ),
+      birthDate: serializer.fromJson<DateTime?>(json['birthDate']),
+      weightKg: serializer.fromJson<double?>(json['weightKg']),
+      chipNumber: serializer.fromJson<String?>(json['chipNumber']),
+      photoPath: serializer.fromJson<String?>(json['photoPath']),
+      bloodType: serializer.fromJson<String?>(json['bloodType']),
+      allergies: serializer.fromJson<List<String>>(json['allergies']),
+      vetId: serializer.fromJson<int?>(json['vetId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'breed': serializer.toJson<String?>(breed),
+      'sex': serializer.toJson<String>($CatsTable.$convertersex.toJson(sex)),
+      'birthDate': serializer.toJson<DateTime?>(birthDate),
+      'weightKg': serializer.toJson<double?>(weightKg),
+      'chipNumber': serializer.toJson<String?>(chipNumber),
+      'photoPath': serializer.toJson<String?>(photoPath),
+      'bloodType': serializer.toJson<String?>(bloodType),
+      'allergies': serializer.toJson<List<String>>(allergies),
+      'vetId': serializer.toJson<int?>(vetId),
+    };
+  }
+
+  Cat copyWith({
+    int? id,
+    String? name,
+    Value<String?> breed = const Value.absent(),
+    CatSex? sex,
+    Value<DateTime?> birthDate = const Value.absent(),
+    Value<double?> weightKg = const Value.absent(),
+    Value<String?> chipNumber = const Value.absent(),
+    Value<String?> photoPath = const Value.absent(),
+    Value<String?> bloodType = const Value.absent(),
+    List<String>? allergies,
+    Value<int?> vetId = const Value.absent(),
+  }) => Cat(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    breed: breed.present ? breed.value : this.breed,
+    sex: sex ?? this.sex,
+    birthDate: birthDate.present ? birthDate.value : this.birthDate,
+    weightKg: weightKg.present ? weightKg.value : this.weightKg,
+    chipNumber: chipNumber.present ? chipNumber.value : this.chipNumber,
+    photoPath: photoPath.present ? photoPath.value : this.photoPath,
+    bloodType: bloodType.present ? bloodType.value : this.bloodType,
+    allergies: allergies ?? this.allergies,
+    vetId: vetId.present ? vetId.value : this.vetId,
+  );
+  Cat copyWithCompanion(CatsCompanion data) {
+    return Cat(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      breed: data.breed.present ? data.breed.value : this.breed,
+      sex: data.sex.present ? data.sex.value : this.sex,
+      birthDate: data.birthDate.present ? data.birthDate.value : this.birthDate,
+      weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
+      chipNumber: data.chipNumber.present
+          ? data.chipNumber.value
+          : this.chipNumber,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
+      bloodType: data.bloodType.present ? data.bloodType.value : this.bloodType,
+      allergies: data.allergies.present ? data.allergies.value : this.allergies,
+      vetId: data.vetId.present ? data.vetId.value : this.vetId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Cat(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('breed: $breed, ')
+          ..write('sex: $sex, ')
+          ..write('birthDate: $birthDate, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('chipNumber: $chipNumber, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('bloodType: $bloodType, ')
+          ..write('allergies: $allergies, ')
+          ..write('vetId: $vetId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    breed,
+    sex,
+    birthDate,
+    weightKg,
+    chipNumber,
+    photoPath,
+    bloodType,
+    allergies,
+    vetId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Cat &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.breed == this.breed &&
+          other.sex == this.sex &&
+          other.birthDate == this.birthDate &&
+          other.weightKg == this.weightKg &&
+          other.chipNumber == this.chipNumber &&
+          other.photoPath == this.photoPath &&
+          other.bloodType == this.bloodType &&
+          other.allergies == this.allergies &&
+          other.vetId == this.vetId);
+}
+
+class CatsCompanion extends UpdateCompanion<Cat> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String?> breed;
+  final Value<CatSex> sex;
+  final Value<DateTime?> birthDate;
+  final Value<double?> weightKg;
+  final Value<String?> chipNumber;
+  final Value<String?> photoPath;
+  final Value<String?> bloodType;
+  final Value<List<String>> allergies;
+  final Value<int?> vetId;
+  const CatsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.breed = const Value.absent(),
+    this.sex = const Value.absent(),
+    this.birthDate = const Value.absent(),
+    this.weightKg = const Value.absent(),
+    this.chipNumber = const Value.absent(),
+    this.photoPath = const Value.absent(),
+    this.bloodType = const Value.absent(),
+    this.allergies = const Value.absent(),
+    this.vetId = const Value.absent(),
+  });
+  CatsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.breed = const Value.absent(),
+    this.sex = const Value.absent(),
+    this.birthDate = const Value.absent(),
+    this.weightKg = const Value.absent(),
+    this.chipNumber = const Value.absent(),
+    this.photoPath = const Value.absent(),
+    this.bloodType = const Value.absent(),
+    this.allergies = const Value.absent(),
+    this.vetId = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<Cat> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? breed,
+    Expression<String>? sex,
+    Expression<DateTime>? birthDate,
+    Expression<double>? weightKg,
+    Expression<String>? chipNumber,
+    Expression<String>? photoPath,
+    Expression<String>? bloodType,
+    Expression<String>? allergies,
+    Expression<int>? vetId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (breed != null) 'breed': breed,
+      if (sex != null) 'sex': sex,
+      if (birthDate != null) 'birth_date': birthDate,
+      if (weightKg != null) 'weight_kg': weightKg,
+      if (chipNumber != null) 'chip_number': chipNumber,
+      if (photoPath != null) 'photo_path': photoPath,
+      if (bloodType != null) 'blood_type': bloodType,
+      if (allergies != null) 'allergies': allergies,
+      if (vetId != null) 'vet_id': vetId,
+    });
+  }
+
+  CatsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String?>? breed,
+    Value<CatSex>? sex,
+    Value<DateTime?>? birthDate,
+    Value<double?>? weightKg,
+    Value<String?>? chipNumber,
+    Value<String?>? photoPath,
+    Value<String?>? bloodType,
+    Value<List<String>>? allergies,
+    Value<int?>? vetId,
+  }) {
+    return CatsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      breed: breed ?? this.breed,
+      sex: sex ?? this.sex,
+      birthDate: birthDate ?? this.birthDate,
+      weightKg: weightKg ?? this.weightKg,
+      chipNumber: chipNumber ?? this.chipNumber,
+      photoPath: photoPath ?? this.photoPath,
+      bloodType: bloodType ?? this.bloodType,
+      allergies: allergies ?? this.allergies,
+      vetId: vetId ?? this.vetId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (breed.present) {
+      map['breed'] = Variable<String>(breed.value);
+    }
+    if (sex.present) {
+      map['sex'] = Variable<String>($CatsTable.$convertersex.toSql(sex.value));
+    }
+    if (birthDate.present) {
+      map['birth_date'] = Variable<DateTime>(birthDate.value);
+    }
+    if (weightKg.present) {
+      map['weight_kg'] = Variable<double>(weightKg.value);
+    }
+    if (chipNumber.present) {
+      map['chip_number'] = Variable<String>(chipNumber.value);
+    }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
+    if (bloodType.present) {
+      map['blood_type'] = Variable<String>(bloodType.value);
+    }
+    if (allergies.present) {
+      map['allergies'] = Variable<String>(
+        $CatsTable.$converterallergies.toSql(allergies.value),
+      );
+    }
+    if (vetId.present) {
+      map['vet_id'] = Variable<int>(vetId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CatsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('breed: $breed, ')
+          ..write('sex: $sex, ')
+          ..write('birthDate: $birthDate, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('chipNumber: $chipNumber, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('bloodType: $bloodType, ')
+          ..write('allergies: $allergies, ')
+          ..write('vetId: $vetId')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $HealthEntriesTable extends HealthEntries
     with TableInfo<$HealthEntriesTable, HealthEntry> {
   @override
@@ -968,6 +974,9 @@ class $HealthEntriesTable extends HealthEntries
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES cats (id) ON DELETE CASCADE',
+    ),
   );
   @override
   late final GeneratedColumnWithTypeConverter<HealthEntryType, String> type =
@@ -1147,8 +1156,8 @@ class $HealthEntriesTable extends HealthEntries
     return $HealthEntriesTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<HealthEntryType, String> $convertertype =
-      const HealthEntryTypeConverter();
+  static JsonTypeConverter2<HealthEntryType, String, String> $convertertype =
+      const EnumNameConverter<HealthEntryType>(HealthEntryType.values);
 }
 
 class HealthEntry extends DataClass implements Insertable<HealthEntry> {
@@ -1215,7 +1224,9 @@ class HealthEntry extends DataClass implements Insertable<HealthEntry> {
     return HealthEntry(
       id: serializer.fromJson<int>(json['id']),
       catId: serializer.fromJson<int>(json['catId']),
-      type: serializer.fromJson<HealthEntryType>(json['type']),
+      type: $HealthEntriesTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
       date: serializer.fromJson<DateTime>(json['date']),
       title: serializer.fromJson<String>(json['title']),
       note: serializer.fromJson<String?>(json['note']),
@@ -1229,7 +1240,9 @@ class HealthEntry extends DataClass implements Insertable<HealthEntry> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'catId': serializer.toJson<int>(catId),
-      'type': serializer.toJson<HealthEntryType>(type),
+      'type': serializer.toJson<String>(
+        $HealthEntriesTable.$convertertype.toJson(type),
+      ),
       'date': serializer.toJson<DateTime>(date),
       'title': serializer.toJson<String>(title),
       'note': serializer.toJson<String?>(note),
@@ -1453,6 +1466,9 @@ class $RemindersTable extends Reminders
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES cats (id) ON DELETE CASCADE',
+    ),
   );
   @override
   late final GeneratedColumnWithTypeConverter<ReminderType, String> type =
@@ -1618,8 +1634,8 @@ class $RemindersTable extends Reminders
     return $RemindersTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<ReminderType, String> $convertertype =
-      const ReminderTypeConverter();
+  static JsonTypeConverter2<ReminderType, String, String> $convertertype =
+      const EnumNameConverter<ReminderType>(ReminderType.values);
 }
 
 class Reminder extends DataClass implements Insertable<Reminder> {
@@ -1680,7 +1696,9 @@ class Reminder extends DataClass implements Insertable<Reminder> {
     return Reminder(
       id: serializer.fromJson<int>(json['id']),
       catId: serializer.fromJson<int>(json['catId']),
-      type: serializer.fromJson<ReminderType>(json['type']),
+      type: $RemindersTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
       dueDate: serializer.fromJson<DateTime>(json['dueDate']),
       title: serializer.fromJson<String>(json['title']),
       description: serializer.fromJson<String?>(json['description']),
@@ -1693,7 +1711,9 @@ class Reminder extends DataClass implements Insertable<Reminder> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'catId': serializer.toJson<int>(catId),
-      'type': serializer.toJson<ReminderType>(type),
+      'type': serializer.toJson<String>(
+        $RemindersTable.$convertertype.toJson(type),
+      ),
       'dueDate': serializer.toJson<DateTime>(dueDate),
       'title': serializer.toJson<String>(title),
       'description': serializer.toJson<String?>(description),
@@ -1878,8 +1898,8 @@ class RemindersCompanion extends UpdateCompanion<Reminder> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $CatsTable cats = $CatsTable(this);
   late final $VetsTable vets = $VetsTable(this);
+  late final $CatsTable cats = $CatsTable(this);
   late final $HealthEntriesTable healthEntries = $HealthEntriesTable(this);
   late final $RemindersTable reminders = $RemindersTable(this);
   late final CatsDao catsDao = CatsDao(this as AppDatabase);
@@ -1893,13 +1913,301 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    cats,
     vets,
+    cats,
     healthEntries,
     reminders,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'vets',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('cats', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'cats',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('health_entries', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'cats',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('reminders', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
+typedef $$VetsTableCreateCompanionBuilder =
+    VetsCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<String?> clinic,
+      required String phone,
+    });
+typedef $$VetsTableUpdateCompanionBuilder =
+    VetsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String?> clinic,
+      Value<String> phone,
+    });
+
+final class $$VetsTableReferences
+    extends BaseReferences<_$AppDatabase, $VetsTable, Vet> {
+  $$VetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$CatsTable, List<Cat>> _catsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.cats,
+    aliasName: $_aliasNameGenerator(db.vets.id, db.cats.vetId),
+  );
+
+  $$CatsTableProcessedTableManager get catsRefs {
+    final manager = $$CatsTableTableManager(
+      $_db,
+      $_db.cats,
+    ).filter((f) => f.vetId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_catsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$VetsTableFilterComposer extends Composer<_$AppDatabase, $VetsTable> {
+  $$VetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clinic => $composableBuilder(
+    column: $table.clinic,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> catsRefs(
+    Expression<bool> Function($$CatsTableFilterComposer f) f,
+  ) {
+    final $$CatsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cats,
+      getReferencedColumn: (t) => t.vetId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CatsTableFilterComposer(
+            $db: $db,
+            $table: $db.cats,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$VetsTableOrderingComposer extends Composer<_$AppDatabase, $VetsTable> {
+  $$VetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clinic => $composableBuilder(
+    column: $table.clinic,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$VetsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $VetsTable> {
+  $$VetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get clinic =>
+      $composableBuilder(column: $table.clinic, builder: (column) => column);
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  Expression<T> catsRefs<T extends Object>(
+    Expression<T> Function($$CatsTableAnnotationComposer a) f,
+  ) {
+    final $$CatsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cats,
+      getReferencedColumn: (t) => t.vetId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CatsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.cats,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$VetsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $VetsTable,
+          Vet,
+          $$VetsTableFilterComposer,
+          $$VetsTableOrderingComposer,
+          $$VetsTableAnnotationComposer,
+          $$VetsTableCreateCompanionBuilder,
+          $$VetsTableUpdateCompanionBuilder,
+          (Vet, $$VetsTableReferences),
+          Vet,
+          PrefetchHooks Function({bool catsRefs})
+        > {
+  $$VetsTableTableManager(_$AppDatabase db, $VetsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$VetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$VetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$VetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> clinic = const Value.absent(),
+                Value<String> phone = const Value.absent(),
+              }) => VetsCompanion(
+                id: id,
+                name: name,
+                clinic: clinic,
+                phone: phone,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<String?> clinic = const Value.absent(),
+                required String phone,
+              }) => VetsCompanion.insert(
+                id: id,
+                name: name,
+                clinic: clinic,
+                phone: phone,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) =>
+                    (e.readTable(table), $$VetsTableReferences(db, table, e)),
+              )
+              .toList(),
+          prefetchHooksCallback: ({catsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (catsRefs) db.cats],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (catsRefs)
+                    await $_getPrefetchedData<Vet, $VetsTable, Cat>(
+                      currentTable: table,
+                      referencedTable: $$VetsTableReferences._catsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$VetsTableReferences(db, table, p0).catsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.vetId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$VetsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $VetsTable,
+      Vet,
+      $$VetsTableFilterComposer,
+      $$VetsTableOrderingComposer,
+      $$VetsTableAnnotationComposer,
+      $$VetsTableCreateCompanionBuilder,
+      $$VetsTableUpdateCompanionBuilder,
+      (Vet, $$VetsTableReferences),
+      Vet,
+      PrefetchHooks Function({bool catsRefs})
+    >;
 typedef $$CatsTableCreateCompanionBuilder =
     CatsCompanion Function({
       Value<int> id,
@@ -1928,6 +2236,64 @@ typedef $$CatsTableUpdateCompanionBuilder =
       Value<List<String>> allergies,
       Value<int?> vetId,
     });
+
+final class $$CatsTableReferences
+    extends BaseReferences<_$AppDatabase, $CatsTable, Cat> {
+  $$CatsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $VetsTable _vetIdTable(_$AppDatabase db) =>
+      db.vets.createAlias($_aliasNameGenerator(db.cats.vetId, db.vets.id));
+
+  $$VetsTableProcessedTableManager? get vetId {
+    final $_column = $_itemColumn<int>('vet_id');
+    if ($_column == null) return null;
+    final manager = $$VetsTableTableManager(
+      $_db,
+      $_db.vets,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_vetIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$HealthEntriesTable, List<HealthEntry>>
+  _healthEntriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.healthEntries,
+    aliasName: $_aliasNameGenerator(db.cats.id, db.healthEntries.catId),
+  );
+
+  $$HealthEntriesTableProcessedTableManager get healthEntriesRefs {
+    final manager = $$HealthEntriesTableTableManager(
+      $_db,
+      $_db.healthEntries,
+    ).filter((f) => f.catId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_healthEntriesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$RemindersTable, List<Reminder>>
+  _remindersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.reminders,
+    aliasName: $_aliasNameGenerator(db.cats.id, db.reminders.catId),
+  );
+
+  $$RemindersTableProcessedTableManager get remindersRefs {
+    final manager = $$RemindersTableTableManager(
+      $_db,
+      $_db.reminders,
+    ).filter((f) => f.catId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_remindersRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$CatsTableFilterComposer extends Composer<_$AppDatabase, $CatsTable> {
   $$CatsTableFilterComposer({
@@ -1989,10 +2355,78 @@ class $$CatsTableFilterComposer extends Composer<_$AppDatabase, $CatsTable> {
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnFilters<int> get vetId => $composableBuilder(
-    column: $table.vetId,
-    builder: (column) => ColumnFilters(column),
-  );
+  $$VetsTableFilterComposer get vetId {
+    final $$VetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.vetId,
+      referencedTable: $db.vets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VetsTableFilterComposer(
+            $db: $db,
+            $table: $db.vets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> healthEntriesRefs(
+    Expression<bool> Function($$HealthEntriesTableFilterComposer f) f,
+  ) {
+    final $$HealthEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.healthEntries,
+      getReferencedColumn: (t) => t.catId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HealthEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.healthEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> remindersRefs(
+    Expression<bool> Function($$RemindersTableFilterComposer f) f,
+  ) {
+    final $$RemindersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reminders,
+      getReferencedColumn: (t) => t.catId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RemindersTableFilterComposer(
+            $db: $db,
+            $table: $db.reminders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CatsTableOrderingComposer extends Composer<_$AppDatabase, $CatsTable> {
@@ -2053,10 +2487,28 @@ class $$CatsTableOrderingComposer extends Composer<_$AppDatabase, $CatsTable> {
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get vetId => $composableBuilder(
-    column: $table.vetId,
-    builder: (column) => ColumnOrderings(column),
-  );
+  $$VetsTableOrderingComposer get vetId {
+    final $$VetsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.vetId,
+      referencedTable: $db.vets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VetsTableOrderingComposer(
+            $db: $db,
+            $table: $db.vets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$CatsTableAnnotationComposer
@@ -2100,8 +2552,78 @@ class $$CatsTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<String>, String> get allergies =>
       $composableBuilder(column: $table.allergies, builder: (column) => column);
 
-  GeneratedColumn<int> get vetId =>
-      $composableBuilder(column: $table.vetId, builder: (column) => column);
+  $$VetsTableAnnotationComposer get vetId {
+    final $$VetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.vetId,
+      referencedTable: $db.vets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.vets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> healthEntriesRefs<T extends Object>(
+    Expression<T> Function($$HealthEntriesTableAnnotationComposer a) f,
+  ) {
+    final $$HealthEntriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.healthEntries,
+      getReferencedColumn: (t) => t.catId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HealthEntriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.healthEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> remindersRefs<T extends Object>(
+    Expression<T> Function($$RemindersTableAnnotationComposer a) f,
+  ) {
+    final $$RemindersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reminders,
+      getReferencedColumn: (t) => t.catId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RemindersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reminders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CatsTableTableManager
@@ -2115,9 +2637,13 @@ class $$CatsTableTableManager
           $$CatsTableAnnotationComposer,
           $$CatsTableCreateCompanionBuilder,
           $$CatsTableUpdateCompanionBuilder,
-          (Cat, BaseReferences<_$AppDatabase, $CatsTable, Cat>),
+          (Cat, $$CatsTableReferences),
           Cat,
-          PrefetchHooks Function()
+          PrefetchHooks Function({
+            bool vetId,
+            bool healthEntriesRefs,
+            bool remindersRefs,
+          })
         > {
   $$CatsTableTableManager(_$AppDatabase db, $CatsTable table)
     : super(
@@ -2183,9 +2709,93 @@ class $$CatsTableTableManager
                 vetId: vetId,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) =>
+                    (e.readTable(table), $$CatsTableReferences(db, table, e)),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback:
+              ({
+                vetId = false,
+                healthEntriesRefs = false,
+                remindersRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (healthEntriesRefs) db.healthEntries,
+                    if (remindersRefs) db.reminders,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (vetId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.vetId,
+                                    referencedTable: $$CatsTableReferences
+                                        ._vetIdTable(db),
+                                    referencedColumn: $$CatsTableReferences
+                                        ._vetIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (healthEntriesRefs)
+                        await $_getPrefetchedData<Cat, $CatsTable, HealthEntry>(
+                          currentTable: table,
+                          referencedTable: $$CatsTableReferences
+                              ._healthEntriesRefsTable(db),
+                          managerFromTypedResult: (p0) => $$CatsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).healthEntriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.catId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (remindersRefs)
+                        await $_getPrefetchedData<Cat, $CatsTable, Reminder>(
+                          currentTable: table,
+                          referencedTable: $$CatsTableReferences
+                              ._remindersRefsTable(db),
+                          managerFromTypedResult: (p0) => $$CatsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).remindersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.catId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
         ),
       );
 }
@@ -2200,176 +2810,13 @@ typedef $$CatsTableProcessedTableManager =
       $$CatsTableAnnotationComposer,
       $$CatsTableCreateCompanionBuilder,
       $$CatsTableUpdateCompanionBuilder,
-      (Cat, BaseReferences<_$AppDatabase, $CatsTable, Cat>),
+      (Cat, $$CatsTableReferences),
       Cat,
-      PrefetchHooks Function()
-    >;
-typedef $$VetsTableCreateCompanionBuilder =
-    VetsCompanion Function({
-      Value<int> id,
-      required String name,
-      Value<String?> clinic,
-      required String phone,
-    });
-typedef $$VetsTableUpdateCompanionBuilder =
-    VetsCompanion Function({
-      Value<int> id,
-      Value<String> name,
-      Value<String?> clinic,
-      Value<String> phone,
-    });
-
-class $$VetsTableFilterComposer extends Composer<_$AppDatabase, $VetsTable> {
-  $$VetsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get clinic => $composableBuilder(
-    column: $table.clinic,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get phone => $composableBuilder(
-    column: $table.phone,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$VetsTableOrderingComposer extends Composer<_$AppDatabase, $VetsTable> {
-  $$VetsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get clinic => $composableBuilder(
-    column: $table.clinic,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get phone => $composableBuilder(
-    column: $table.phone,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$VetsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $VetsTable> {
-  $$VetsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
-
-  GeneratedColumn<String> get clinic =>
-      $composableBuilder(column: $table.clinic, builder: (column) => column);
-
-  GeneratedColumn<String> get phone =>
-      $composableBuilder(column: $table.phone, builder: (column) => column);
-}
-
-class $$VetsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $VetsTable,
-          Vet,
-          $$VetsTableFilterComposer,
-          $$VetsTableOrderingComposer,
-          $$VetsTableAnnotationComposer,
-          $$VetsTableCreateCompanionBuilder,
-          $$VetsTableUpdateCompanionBuilder,
-          (Vet, BaseReferences<_$AppDatabase, $VetsTable, Vet>),
-          Vet,
-          PrefetchHooks Function()
-        > {
-  $$VetsTableTableManager(_$AppDatabase db, $VetsTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$VetsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$VetsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$VetsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<String?> clinic = const Value.absent(),
-                Value<String> phone = const Value.absent(),
-              }) => VetsCompanion(
-                id: id,
-                name: name,
-                clinic: clinic,
-                phone: phone,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String name,
-                Value<String?> clinic = const Value.absent(),
-                required String phone,
-              }) => VetsCompanion.insert(
-                id: id,
-                name: name,
-                clinic: clinic,
-                phone: phone,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$VetsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $VetsTable,
-      Vet,
-      $$VetsTableFilterComposer,
-      $$VetsTableOrderingComposer,
-      $$VetsTableAnnotationComposer,
-      $$VetsTableCreateCompanionBuilder,
-      $$VetsTableUpdateCompanionBuilder,
-      (Vet, BaseReferences<_$AppDatabase, $VetsTable, Vet>),
-      Vet,
-      PrefetchHooks Function()
+      PrefetchHooks Function({
+        bool vetId,
+        bool healthEntriesRefs,
+        bool remindersRefs,
+      })
     >;
 typedef $$HealthEntriesTableCreateCompanionBuilder =
     HealthEntriesCompanion Function({
@@ -2394,6 +2841,33 @@ typedef $$HealthEntriesTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
+final class $$HealthEntriesTableReferences
+    extends BaseReferences<_$AppDatabase, $HealthEntriesTable, HealthEntry> {
+  $$HealthEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CatsTable _catIdTable(_$AppDatabase db) => db.cats.createAlias(
+    $_aliasNameGenerator(db.healthEntries.catId, db.cats.id),
+  );
+
+  $$CatsTableProcessedTableManager get catId {
+    final $_column = $_itemColumn<int>('cat_id')!;
+
+    final manager = $$CatsTableTableManager(
+      $_db,
+      $_db.cats,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_catIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
 class $$HealthEntriesTableFilterComposer
     extends Composer<_$AppDatabase, $HealthEntriesTable> {
   $$HealthEntriesTableFilterComposer({
@@ -2405,11 +2879,6 @@ class $$HealthEntriesTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get catId => $composableBuilder(
-    column: $table.catId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2443,6 +2912,29 @@ class $$HealthEntriesTableFilterComposer
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$CatsTableFilterComposer get catId {
+    final $$CatsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.catId,
+      referencedTable: $db.cats,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CatsTableFilterComposer(
+            $db: $db,
+            $table: $db.cats,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$HealthEntriesTableOrderingComposer
@@ -2456,11 +2948,6 @@ class $$HealthEntriesTableOrderingComposer
   });
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get catId => $composableBuilder(
-    column: $table.catId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2493,6 +2980,29 @@ class $$HealthEntriesTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$CatsTableOrderingComposer get catId {
+    final $$CatsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.catId,
+      referencedTable: $db.cats,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CatsTableOrderingComposer(
+            $db: $db,
+            $table: $db.cats,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$HealthEntriesTableAnnotationComposer
@@ -2506,9 +3016,6 @@ class $$HealthEntriesTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<int> get catId =>
-      $composableBuilder(column: $table.catId, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<HealthEntryType, String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
@@ -2527,6 +3034,29 @@ class $$HealthEntriesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$CatsTableAnnotationComposer get catId {
+    final $$CatsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.catId,
+      referencedTable: $db.cats,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CatsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.cats,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$HealthEntriesTableTableManager
@@ -2540,12 +3070,9 @@ class $$HealthEntriesTableTableManager
           $$HealthEntriesTableAnnotationComposer,
           $$HealthEntriesTableCreateCompanionBuilder,
           $$HealthEntriesTableUpdateCompanionBuilder,
-          (
-            HealthEntry,
-            BaseReferences<_$AppDatabase, $HealthEntriesTable, HealthEntry>,
-          ),
+          (HealthEntry, $$HealthEntriesTableReferences),
           HealthEntry,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool catId})
         > {
   $$HealthEntriesTableTableManager(_$AppDatabase db, $HealthEntriesTable table)
     : super(
@@ -2599,9 +3126,54 @@ class $$HealthEntriesTableTableManager
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$HealthEntriesTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({catId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (catId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.catId,
+                                referencedTable: $$HealthEntriesTableReferences
+                                    ._catIdTable(db),
+                                referencedColumn: $$HealthEntriesTableReferences
+                                    ._catIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -2616,12 +3188,9 @@ typedef $$HealthEntriesTableProcessedTableManager =
       $$HealthEntriesTableAnnotationComposer,
       $$HealthEntriesTableCreateCompanionBuilder,
       $$HealthEntriesTableUpdateCompanionBuilder,
-      (
-        HealthEntry,
-        BaseReferences<_$AppDatabase, $HealthEntriesTable, HealthEntry>,
-      ),
+      (HealthEntry, $$HealthEntriesTableReferences),
       HealthEntry,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool catId})
     >;
 typedef $$RemindersTableCreateCompanionBuilder =
     RemindersCompanion Function({
@@ -2644,6 +3213,28 @@ typedef $$RemindersTableUpdateCompanionBuilder =
       Value<bool> isDone,
     });
 
+final class $$RemindersTableReferences
+    extends BaseReferences<_$AppDatabase, $RemindersTable, Reminder> {
+  $$RemindersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CatsTable _catIdTable(_$AppDatabase db) =>
+      db.cats.createAlias($_aliasNameGenerator(db.reminders.catId, db.cats.id));
+
+  $$CatsTableProcessedTableManager get catId {
+    final $_column = $_itemColumn<int>('cat_id')!;
+
+    final manager = $$CatsTableTableManager(
+      $_db,
+      $_db.cats,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_catIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
 class $$RemindersTableFilterComposer
     extends Composer<_$AppDatabase, $RemindersTable> {
   $$RemindersTableFilterComposer({
@@ -2655,11 +3246,6 @@ class $$RemindersTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get catId => $composableBuilder(
-    column: $table.catId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2688,6 +3274,29 @@ class $$RemindersTableFilterComposer
     column: $table.isDone,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$CatsTableFilterComposer get catId {
+    final $$CatsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.catId,
+      referencedTable: $db.cats,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CatsTableFilterComposer(
+            $db: $db,
+            $table: $db.cats,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$RemindersTableOrderingComposer
@@ -2701,11 +3310,6 @@ class $$RemindersTableOrderingComposer
   });
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get catId => $composableBuilder(
-    column: $table.catId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2733,6 +3337,29 @@ class $$RemindersTableOrderingComposer
     column: $table.isDone,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$CatsTableOrderingComposer get catId {
+    final $$CatsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.catId,
+      referencedTable: $db.cats,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CatsTableOrderingComposer(
+            $db: $db,
+            $table: $db.cats,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$RemindersTableAnnotationComposer
@@ -2746,9 +3373,6 @@ class $$RemindersTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<int> get catId =>
-      $composableBuilder(column: $table.catId, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<ReminderType, String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
@@ -2766,6 +3390,29 @@ class $$RemindersTableAnnotationComposer
 
   GeneratedColumn<bool> get isDone =>
       $composableBuilder(column: $table.isDone, builder: (column) => column);
+
+  $$CatsTableAnnotationComposer get catId {
+    final $$CatsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.catId,
+      referencedTable: $db.cats,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CatsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.cats,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$RemindersTableTableManager
@@ -2779,9 +3426,9 @@ class $$RemindersTableTableManager
           $$RemindersTableAnnotationComposer,
           $$RemindersTableCreateCompanionBuilder,
           $$RemindersTableUpdateCompanionBuilder,
-          (Reminder, BaseReferences<_$AppDatabase, $RemindersTable, Reminder>),
+          (Reminder, $$RemindersTableReferences),
           Reminder,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool catId})
         > {
   $$RemindersTableTableManager(_$AppDatabase db, $RemindersTable table)
     : super(
@@ -2831,9 +3478,54 @@ class $$RemindersTableTableManager
                 isDone: isDone,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$RemindersTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({catId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (catId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.catId,
+                                referencedTable: $$RemindersTableReferences
+                                    ._catIdTable(db),
+                                referencedColumn: $$RemindersTableReferences
+                                    ._catIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -2848,16 +3540,16 @@ typedef $$RemindersTableProcessedTableManager =
       $$RemindersTableAnnotationComposer,
       $$RemindersTableCreateCompanionBuilder,
       $$RemindersTableUpdateCompanionBuilder,
-      (Reminder, BaseReferences<_$AppDatabase, $RemindersTable, Reminder>),
+      (Reminder, $$RemindersTableReferences),
       Reminder,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool catId})
     >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$CatsTableTableManager get cats => $$CatsTableTableManager(_db, _db.cats);
   $$VetsTableTableManager get vets => $$VetsTableTableManager(_db, _db.vets);
+  $$CatsTableTableManager get cats => $$CatsTableTableManager(_db, _db.cats);
   $$HealthEntriesTableTableManager get healthEntries =>
       $$HealthEntriesTableTableManager(_db, _db.healthEntries);
   $$RemindersTableTableManager get reminders =>

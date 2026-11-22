@@ -1,17 +1,35 @@
+import 'package:intl/intl.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 
 extension ReminderStatusExt on Reminder {
+  /// Calendar days until [dueDate] (negative when late). Compared in UTC so a
+  /// DST change never turns "tomorrow" into "today".
+  int get daysLeft {
+    final now = DateTime.now();
+    return DateTime.utc(dueDate.year, dueDate.month, dueDate.day)
+        .difference(DateTime.utc(now.year, now.month, now.day))
+        .inDays;
+  }
+
   /// Computes HealthStatus from dueDate — uses relational pattern matching.
   HealthStatus get healthStatus {
     if (isDone) return HealthStatus.upToDate;
-    final daysLeft = dueDate.difference(DateTime.now()).inDays;
     return switch (daysLeft) {
       < 0 => HealthStatus.late,
       <= 7 => HealthStatus.upcoming,
       _ => HealthStatus.upToDate,
     };
   }
+
+  /// Human due-date label shared by every reminder card.
+  String get dueLabel => switch (daysLeft) {
+        < 0 => 'En retard de ${-daysLeft} j',
+        0 => "Aujourd'hui",
+        1 => 'Demain',
+        <= 30 => 'Dans $daysLeft jours',
+        _ => DateFormat('d MMM', 'fr').format(dueDate),
+      };
 }
 
 extension CatAgeExt on Cat {

@@ -3,22 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pattes_et_carnets/app/theme.dart';
-import 'package:pattes_et_carnets/features/home/home_provider.dart';
+import 'package:pattes_et_carnets/shared/providers/data_providers.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 import 'package:pattes_et_carnets/shared/models/reminder_extensions.dart';
 import 'package:pattes_et_carnets/shared/providers/database_provider.dart';
-import 'package:pattes_et_carnets/shared/services/notification_service.dart';
+import 'package:pattes_et_carnets/shared/services/care_actions.dart';
 
-class CalendarScreen extends ConsumerWidget {
+class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
+}
+
+class _CalendarScreenState extends ConsumerState<CalendarScreen> {
+  DateTime _month = DateUtils.dateOnly(DateTime.now()).copyWith(day: 1);
+  DateTime? _selectedDay;
+
+  @override
+  Widget build(BuildContext context) {
     final catsAsync = ref.watch(catsStreamProvider);
     final remindersAsync = ref.watch(allPendingRemindersProvider);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final db = ref.read(databaseProvider);
 
     final cats = catsAsync.valueOrNull ?? [];
     final catMap = {for (final c in cats) c.id: c};
@@ -41,79 +50,263 @@ class CalendarScreen extends ConsumerWidget {
               ],
             ),
           ),
-          remindersAsync.when(
+          ...remindersAsync.when<List<Widget>>(
             data: (reminders) {
               if (reminders.isEmpty) {
-                return SliverFillRemaining(
-                  child: _EmptyState(
-                    cats: cats,
-                    onAdd: (catId) => _showAddReminderSheet(context, ref, cats, catId),
+                return [
+                  SliverFillRemaining(
+                    child: _EmptyState(
+                      cats: cats,
+                      onAdd: () => _showReminderSheet(cats),
+                    ),
                   ),
-                );
+                ];
               }
-              return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (ctx, i) {
-                      final reminder = reminders[i];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _ReminderCard(
-                          reminder: reminder,
-                          catName: catMap[reminder.catId]?.name,
-                          onMarkDone: () async {
-                            await ref
-                                .read(remindersDaoProvider)
-                                .markDone(reminder.id);
-                            await NotificationService.cancelReminder(reminder.id);
-                          },
-                          onDelete: () async {
-                            await ref
-                                .read(remindersDaoProvider)
-                                .deleteReminder(reminder.id);
-                            await NotificationService.cancelReminder(reminder.id);
-                          },
-                        ),
-                      );
-                    },
-                    childCount: reminders.length,
+              final selected = _selectedDay;
+              final visible = selected == null
+                  ? reminders
+                  : reminders
+                      .where((r) => DateUtils.isSameDay(r.dueDate, selected))
+                      .toList();
+              return [
+                SliverToBoxAdapter(
+                  child: _MonthGrid(
+                    month: _month,
+                    selectedDay: selected,
+                    reminders: reminders,
+                    onMonthChanged: (m) => setState(() => _month = m),
+                    // Tapping the selected day again shows every reminder.
+                    onDayTap: (d) => setState(() => _selectedDay =
+                        selected != null && DateUtils.isSameDay(d, selected)
+                            ? null
+                            : d),
                   ),
                 ),
-              );
+                if (visible.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Text(
+                        'Aucun rappel ce jour-là.',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ),
+                  ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (ctx, i) {
+                        final reminder = visible[i];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _ReminderCard(
+                            reminder: reminder,
+                            catName: catMap[reminder.catId]?.name,
+                            onTap: () =>
+                                _showReminderSheet(cats, reminder: reminder),
+                            onMarkDone: () => markReminderDone(db, reminder.id),
+                            onDelete: () => deleteReminder(db, reminder.id),
+                          ),
+                        );
+                      },
+                      childCount: visible.length,
+                    ),
+                  ),
+                ),
+              ];
             },
-            loading: () => const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (e, _) => SliverFillRemaining(
-              child: Center(child: Text('Erreur: $e')),
-            ),
+            loading: () => const [
+              SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ],
+            error: (e, _) => [
+              SliverFillRemaining(
+                child: Center(child: Text('Erreur: $e')),
+              ),
+            ],
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddReminderSheet(context, ref, cats, null),
+        onPressed: () => _showReminderSheet(cats),
         icon: const Icon(Icons.add_alert_outlined),
         label: const Text('Ajouter un rappel'),
       ),
     );
   }
 
-  Future<void> _showAddReminderSheet(
-    BuildContext context,
-    WidgetRef ref,
-    List<Cat> cats,
-    int? preselectedCatId,
-  ) async {
+  /// Creates a reminder, or edits [reminder] when given.
+  Future<void> _showReminderSheet(List<Cat> cats, {Reminder? reminder}) async {
     if (cats.isEmpty) return;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AddReminderSheet(
+      builder: (_) => _ReminderSheet(
         cats: cats,
-        widgetRef: ref,
-        preselectedCatId: preselectedCatId ?? cats.first.id,
+        reminder: reminder,
+        initialDueDate: _selectedDay,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Month grid
+// ---------------------------------------------------------------------------
+
+class _MonthGrid extends StatelessWidget {
+  const _MonthGrid({
+    required this.month,
+    required this.selectedDay,
+    required this.reminders,
+    required this.onMonthChanged,
+    required this.onDayTap,
+  });
+
+  /// First day of the displayed month.
+  final DateTime month;
+  final DateTime? selectedDay;
+  final List<Reminder> reminders;
+  final ValueChanged<DateTime> onMonthChanged;
+  final ValueChanged<DateTime> onDayTap;
+
+  static const _weekdays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    // Worst status per day (HealthStatus is ordered upToDate < upcoming < late).
+    final statusByDay = <DateTime, HealthStatus>{};
+    for (final r in reminders) {
+      final day = DateUtils.dateOnly(r.dueDate);
+      final status = r.healthStatus;
+      final current = statusByDay[day];
+      if (current == null || status.index > current.index) {
+        statusByDay[day] = status;
+      }
+    }
+
+    final leadingBlanks = month.weekday - 1; // weeks start on Monday
+    final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
+    final title = DateFormat('MMMM yyyy', 'fr').format(month);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                tooltip: 'Mois précédent',
+                onPressed: () =>
+                    onMonthChanged(DateTime(month.year, month.month - 1)),
+              ),
+              Expanded(
+                child: Text(
+                  '${title[0].toUpperCase()}${title.substring(1)}',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                tooltip: 'Mois suivant',
+                onPressed: () =>
+                    onMonthChanged(DateTime(month.year, month.month + 1)),
+              ),
+            ],
+          ),
+          GridView.count(
+            crossAxisCount: 7,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              for (final w in _weekdays)
+                Center(
+                  child: Text(
+                    w,
+                    style: theme.textTheme.labelMedium
+                        ?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ),
+              for (var i = 0; i < leadingBlanks; i++) const SizedBox.shrink(),
+              for (var d = 1; d <= daysInMonth; d++)
+                _DayCell(
+                  day: DateTime(month.year, month.month, d),
+                  selected: selectedDay != null &&
+                      DateUtils.isSameDay(selectedDay, DateTime(month.year, month.month, d)),
+                  status: statusByDay[DateTime(month.year, month.month, d)],
+                  onTap: onDayTap,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DayCell extends StatelessWidget {
+  const _DayCell({
+    required this.day,
+    required this.selected,
+    required this.status,
+    required this.onTap,
+  });
+
+  final DateTime day;
+  final bool selected;
+  final HealthStatus? status;
+  final ValueChanged<DateTime> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isToday = DateUtils.isSameDay(day, DateTime.now());
+    final dayStatus = status;
+
+    return InkWell(
+      customBorder: const CircleBorder(),
+      onTap: () => onTap(day),
+      child: Container(
+        margin: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: selected ? scheme.primary : null,
+          border: isToday && !selected ? Border.all(color: scheme.primary) : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '${day.day}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: selected ? scheme.onPrimary : null,
+              ),
+            ),
+            Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: dayStatus == null
+                    ? Colors.transparent
+                    : selected
+                        ? scheme.onPrimary
+                        : dayStatus.statusColor(scheme),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -127,12 +320,14 @@ class _ReminderCard extends StatelessWidget {
   const _ReminderCard({
     required this.reminder,
     required this.catName,
+    required this.onTap,
     required this.onMarkDone,
     required this.onDelete,
   });
 
   final Reminder reminder;
   final String? catName;
+  final VoidCallback onTap;
   final VoidCallback onMarkDone;
   final VoidCallback onDelete;
 
@@ -142,119 +337,110 @@ class _ReminderCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final status = reminder.healthStatus;
     final statusColor = status.statusColor(scheme);
-    final daysLeft = reminder.dueDate.difference(DateTime.now()).inDays;
-    final dueDateLabel = _dueDateLabel(reminder.dueDate, daysLeft);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.cardSurface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [AppTheme.cardShadow],
-        border: Border(
-          left: BorderSide(color: statusColor, width: 4),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.cardSurface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [AppTheme.cardShadow],
+          border: Border(
+            left: BorderSide(color: statusColor, width: 4),
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Icon circle
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: status.statusContainerColor(scheme),
-                shape: BoxShape.circle,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon circle
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: status.statusContainerColor(scheme),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  reminder.type.icon,
+                  size: 22,
+                  color: statusColor,
+                ),
               ),
-              child: Icon(
-                reminder.type.icon,
-                size: 22,
-                color: statusColor,
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          dueDateLabel,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.w700,
+              const SizedBox(width: 12),
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            reminder.dueLabel,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: statusColor,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ),
-                      _StatusChip(status: status, scheme: scheme),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(reminder.title, style: theme.textTheme.titleSmall),
-                  if (catName != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      catName!,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
+                        _StatusChip(status: status, scheme: scheme),
+                      ],
                     ),
-                  ],
-                  if (reminder.description != null &&
-                      reminder.description!.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      reminder.description!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                    Text(reminder.title, style: theme.textTheme.titleSmall),
+                    if (catName != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        catName!,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    ],
+                    if (reminder.description != null &&
+                        reminder.description!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        reminder.description!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Actions column
+              Column(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.check_circle_outline, color: scheme.primary),
+                    tooltip: 'Marquer comme fait',
+                    onPressed: onMarkDone,
+                    iconSize: 22,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete_outline, color: scheme.outline),
+                    tooltip: 'Supprimer',
+                    onPressed: () => _confirmDelete(context),
+                    iconSize: 20,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            // Actions column
-            Column(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.check_circle_outline, color: scheme.primary),
-                  tooltip: 'Marquer comme fait',
-                  onPressed: onMarkDone,
-                  iconSize: 22,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete_outline, color: scheme.outline),
-                  tooltip: 'Supprimer',
-                  onPressed: () => _confirmDelete(context),
-                  iconSize: 20,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  String _dueDateLabel(DateTime dueDate, int daysLeft) {
-    if (daysLeft < 0) return 'En retard de ${-daysLeft} j';
-    return switch (daysLeft) {
-      0 => 'Aujourd\'hui',
-      1 => 'Demain',
-      int d when d <= 30 => 'Dans $d jours',
-      _ => DateFormat('d MMM', 'fr').format(dueDate),
-    };
   }
 
   void _confirmDelete(BuildContext context) {
@@ -321,7 +507,7 @@ class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.cats, required this.onAdd});
 
   final List<Cat> cats;
-  final void Function(int? catId) onAdd;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -351,7 +537,7 @@ class _EmptyState extends StatelessWidget {
             if (cats.isNotEmpty) ...[
               const SizedBox(height: 32),
               FilledButton.icon(
-                onPressed: () => onAdd(null),
+                onPressed: onAdd,
                 icon: const Icon(Icons.add_alert_outlined),
                 label: const Text('Ajouter un rappel'),
               ),
@@ -367,34 +553,34 @@ class _EmptyState extends StatelessWidget {
 // Add reminder bottom sheet
 // ---------------------------------------------------------------------------
 
-class _AddReminderSheet extends ConsumerStatefulWidget {
-  const _AddReminderSheet({
+class _ReminderSheet extends ConsumerStatefulWidget {
+  const _ReminderSheet({
     required this.cats,
-    required this.widgetRef,
-    required this.preselectedCatId,
+    this.reminder,
+    this.initialDueDate,
   });
 
   final List<Cat> cats;
-  final WidgetRef widgetRef;
-  final int preselectedCatId;
+
+  /// Reminder being edited; null to create a new one.
+  final Reminder? reminder;
+  final DateTime? initialDueDate;
 
   @override
-  ConsumerState<_AddReminderSheet> createState() => _AddReminderSheetState();
+  ConsumerState<_ReminderSheet> createState() => _ReminderSheetState();
 }
 
-class _AddReminderSheetState extends ConsumerState<_AddReminderSheet> {
-  final _titleController = TextEditingController();
-  final _descController = TextEditingController();
-  late int _selectedCatId;
-  ReminderType _type = ReminderType.vaccin;
-  DateTime _dueDate = DateTime.now().add(const Duration(days: 7));
+class _ReminderSheetState extends ConsumerState<_ReminderSheet> {
+  late final _titleController =
+      TextEditingController(text: widget.reminder?.title);
+  late final _descController =
+      TextEditingController(text: widget.reminder?.description);
+  late int _selectedCatId = widget.reminder?.catId ?? widget.cats.first.id;
+  late ReminderType _type = widget.reminder?.type ?? ReminderType.vaccin;
+  late DateTime _dueDate = widget.reminder?.dueDate ??
+      widget.initialDueDate ??
+      DateTime.now().add(const Duration(days: 7));
   bool _saving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedCatId = widget.preselectedCatId;
-  }
 
   @override
   void dispose() {
@@ -409,35 +595,30 @@ class _AddReminderSheetState extends ConsumerState<_AddReminderSheet> {
     setState(() => _saving = true);
 
     final desc = _descController.text.trim();
-    final dao = widget.widgetRef.read(remindersDaoProvider);
-    final id = await dao.insertReminder(
+    final editing = widget.reminder;
+    await saveReminder(
+      ref.read(databaseProvider),
       RemindersCompanion(
+        id: editing == null ? const Value.absent() : Value(editing.id),
         catId: Value(_selectedCatId),
         type: Value(_type),
         dueDate: Value(_dueDate),
         title: Value(title),
         description: Value(desc.isEmpty ? null : desc),
+        isDone: const Value(false),
       ),
     );
-
-    // Schedule the notification for this new reminder.
-    final catName = widget.cats.firstWhere(
-      (c) => c.id == _selectedCatId,
-      orElse: () => widget.cats.first,
-    ).name;
-    final reminder = await dao.getReminderById(id);
-    if (reminder != null) {
-      await NotificationService.scheduleReminder(reminder, catName);
-    }
 
     if (mounted) Navigator.pop(context);
   }
 
   Future<void> _pickDate() async {
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
     final picked = await showDatePicker(
       context: context,
       initialDate: _dueDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      // An overdue reminder being edited keeps its date selectable.
+      firstDate: _dueDate.isBefore(yesterday) ? _dueDate : yesterday,
       lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
     );
     if (picked != null) setState(() => _dueDate = picked);
@@ -475,7 +656,10 @@ class _AddReminderSheetState extends ConsumerState<_AddReminderSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Nouveau rappel', style: theme.textTheme.headlineMedium),
+            Text(
+              widget.reminder == null ? 'Nouveau rappel' : 'Modifier le rappel',
+              style: theme.textTheme.headlineMedium,
+            ),
             const SizedBox(height: 24),
 
             // Cat picker (only if more than one cat)
@@ -549,7 +733,7 @@ class _AddReminderSheetState extends ConsumerState<_AddReminderSheet> {
 
             TextField(
               controller: _titleController,
-              autofocus: true,
+              autofocus: widget.reminder == null,
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
                 labelText: 'Titre *',
@@ -581,7 +765,7 @@ class _AddReminderSheetState extends ConsumerState<_AddReminderSheet> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Créer le rappel'),
+                    : Text(widget.reminder == null ? 'Créer le rappel' : 'Enregistrer'),
               ),
             ),
           ],

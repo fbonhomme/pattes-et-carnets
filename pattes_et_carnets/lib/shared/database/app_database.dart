@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -11,59 +12,13 @@ import 'package:pattes_et_carnets/shared/database/daos/cats_dao.dart';
 import 'package:pattes_et_carnets/shared/database/daos/vets_dao.dart';
 import 'package:pattes_et_carnets/shared/database/daos/health_entries_dao.dart';
 import 'package:pattes_et_carnets/shared/database/daos/reminders_dao.dart';
+import 'package:pattes_et_carnets/shared/database/database_seeder.dart';
 
 part 'app_database.g.dart';
 
 // ---------------------------------------------------------------------------
-// Type Converters — switch expressions per dart-use-pattern-matching skill
+// Type Converters
 // ---------------------------------------------------------------------------
-
-class CatSexConverter extends TypeConverter<CatSex, String> {
-  const CatSexConverter();
-
-  @override
-  CatSex fromSql(String fromDb) => switch (fromDb) {
-        'male' => CatSex.male,
-        _ => CatSex.female,
-      };
-
-  @override
-  String toSql(CatSex value) => value.name;
-}
-
-class HealthEntryTypeConverter extends TypeConverter<HealthEntryType, String> {
-  const HealthEntryTypeConverter();
-
-  @override
-  HealthEntryType fromSql(String fromDb) => switch (fromDb) {
-        'vaccination' => HealthEntryType.vaccination,
-        'antiparasitaire' => HealthEntryType.antiparasitaire,
-        'vermifuge' => HealthEntryType.vermifuge,
-        'alimentation' => HealthEntryType.alimentation,
-        'visite' => HealthEntryType.visite,
-        _ => HealthEntryType.note,
-      };
-
-  @override
-  String toSql(HealthEntryType value) => value.name;
-}
-
-class ReminderTypeConverter extends TypeConverter<ReminderType, String> {
-  const ReminderTypeConverter();
-
-  @override
-  ReminderType fromSql(String fromDb) => switch (fromDb) {
-        'vaccin' => ReminderType.vaccin,
-        'vermifuge' => ReminderType.vermifuge,
-        'rdvVeterinaire' => ReminderType.rdvVeterinaire,
-        'antiparasitaire' => ReminderType.antiparasitaire,
-        'hygiene' => ReminderType.hygiene,
-        _ => ReminderType.traitement,
-      };
-
-  @override
-  String toSql(ReminderType value) => value.name;
-}
 
 class StringListConverter extends TypeConverter<List<String>, String> {
   const StringListConverter();
@@ -95,9 +50,8 @@ class Cats extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   TextColumn get breed => text().nullable()();
-  TextColumn get sex => text()
-      .map(const CatSexConverter())
-      .withDefault(const Constant('female'))();
+  TextColumn get sex =>
+      textEnum<CatSex>().withDefault(const Constant('female'))();
   DateTimeColumn get birthDate => dateTime().nullable()();
   RealColumn get weightKg => real().nullable()();
   TextColumn get chipNumber => text().nullable()();
@@ -106,14 +60,17 @@ class Cats extends Table {
   TextColumn get allergies => text()
       .map(const StringListConverter())
       .withDefault(const Constant('[]'))();
-  IntColumn get vetId => integer().nullable()();
+  IntColumn get vetId => integer()
+      .nullable()
+      .references(Vets, #id, onDelete: KeyAction.setNull)();
 }
 
 @DataClassName('HealthEntry')
 class HealthEntries extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get catId => integer()();
-  TextColumn get type => text().map(const HealthEntryTypeConverter())();
+  IntColumn get catId =>
+      integer().references(Cats, #id, onDelete: KeyAction.cascade)();
+  TextColumn get type => textEnum<HealthEntryType>()();
   DateTimeColumn get date => dateTime()();
   TextColumn get title => text()();
   TextColumn get note => text().nullable()();
@@ -125,8 +82,9 @@ class HealthEntries extends Table {
 @DataClassName('Reminder')
 class Reminders extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get catId => integer()();
-  TextColumn get type => text().map(const ReminderTypeConverter())();
+  IntColumn get catId =>
+      integer().references(Cats, #id, onDelete: KeyAction.cascade)();
+  TextColumn get type => textEnum<ReminderType>()();
   DateTimeColumn get dueDate => dateTime()();
   TextColumn get title => text()();
   TextColumn get description => text().nullable()();
@@ -142,11 +100,42 @@ class Reminders extends Table {
   daos: [CatsDao, VetsDao, HealthEntriesDao, RemindersDao],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
-  AppDatabase.forTesting(super.e);
+  AppDatabase() : _seedDemo = kDebugMode, super(_openConnection());
+  AppDatabase.forTesting(super.e) : _seedDemo = false;
+
+  final bool _seedDemo;
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+          // Demo data only on a fresh debug install — never re-seeded after
+          // the user deletes every cat.
+          if (_seedDemo) await DatabaseSeeder(this).seed();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            // v2 adds foreign keys: drop orphans left by the old non-atomic
+            // delete, then rebuild the tables with their constraints.
+            await customStatement(
+              'DELETE FROM health_entries WHERE cat_id NOT IN (SELECT id FROM cats)',
+            );
+            await customStatement(
+              'DELETE FROM reminders WHERE cat_id NOT IN (SELECT id FROM cats)',
+            );
+            await customStatement(
+              'UPDATE cats SET vet_id = NULL WHERE vet_id NOT IN (SELECT id FROM vets)',
+            );
+            await m.alterTable(TableMigration(cats));
+            await m.alterTable(TableMigration(healthEntries));
+            await m.alterTable(TableMigration(reminders));
+          }
+        },
+        beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
+      );
 }
 
 LazyDatabase _openConnection() {

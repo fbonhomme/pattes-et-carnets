@@ -53,20 +53,29 @@ final appRouter = GoRouter(
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/journal/:catId',
-      builder: (context, state) =>
-          JournalScreen(catId: state.pathParameters['catId']!),
+      redirect: _requireCatId,
+      builder: (context, state) => JournalScreen(catId: _catId(state)),
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/cat/:catId',
-      builder: (context, state) =>
-          CatProfileScreen(catId: state.pathParameters['catId']!),
+      redirect: _requireCatId,
+      builder: (context, state) => CatProfileScreen(catId: _catId(state)),
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/emergency/:catId',
-      builder: (context, state) =>
-          EmergencyScreen(catId: state.pathParameters['catId']!),
+      redirect: _requireCatId,
+      builder: (context, state) => EmergencyScreen(catId: _catId(state)),
     ),
   ],
 );
+
+// Parse the :catId path parameter once here so screens receive an int.
+int? _tryCatId(GoRouterState state) =>
+    int.tryParse(state.pathParameters['catId'] ?? '');
+
+int _catId(GoRouterState state) => _tryCatId(state)!;
+
+String? _requireCatId(BuildContext context, GoRouterState state) =>
+    _tryCatId(state) == null ? '/' : null;

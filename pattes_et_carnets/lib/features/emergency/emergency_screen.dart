@@ -4,31 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:pattes_et_carnets/app/theme.dart';
-import 'package:pattes_et_carnets/features/home/home_provider.dart';
+import 'package:pattes_et_carnets/shared/providers/data_providers.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/reminder_extensions.dart';
 
-class EmergencyScreen extends StatelessWidget {
+class EmergencyScreen extends ConsumerWidget {
   const EmergencyScreen({super.key, required this.catId});
-
-  final String catId;
-
-  @override
-  Widget build(BuildContext context) {
-    final id = int.tryParse(catId);
-    if (id == null) {
-      return const Scaffold(body: Center(child: Text('ID invalide')));
-    }
-    return _EmergencyView(catId: id);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Main view
-// ---------------------------------------------------------------------------
-
-class _EmergencyView extends ConsumerWidget {
-  const _EmergencyView({required this.catId});
 
   final int catId;
 
