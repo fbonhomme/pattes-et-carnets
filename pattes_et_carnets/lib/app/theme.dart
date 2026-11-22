@@ -127,9 +127,12 @@ class AppTheme {
         chipTheme: ChipThemeData(
           shape: const StadiumBorder(),
           backgroundColor: _surfaceContainerHigh,
+          // Explicit color: without it the label rendered white on the light
+          // chip background.
           labelStyle: GoogleFonts.nunitoSans(
             fontSize: 14,
             fontWeight: FontWeight.w700,
+            color: _onSurfaceVariant,
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(

@@ -145,6 +145,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true, // cover the bottom nav bar
       backgroundColor: Colors.transparent,
       builder: (_) => _ReminderSheet(
         cats: cats,
@@ -224,19 +225,29 @@ class _MonthGrid extends StatelessWidget {
               ),
             ],
           ),
-          GridView.count(
-            crossAxisCount: 7,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+          Row(
             children: [
               for (final w in _weekdays)
-                Center(
+                Expanded(
                   child: Text(
                     w,
+                    textAlign: TextAlign.center,
                     style: theme.textTheme.labelMedium
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),
                 ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          GridView(
+            // Fixed row height: square cells would fill a tablet screen.
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              mainAxisExtent: 48,
+            ),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
               for (var i = 0; i < leadingBlanks; i++) const SizedBox.shrink(),
               for (var d = 1; d <= daysInMonth; d++)
                 _DayCell(
@@ -274,38 +285,43 @@ class _DayCell extends StatelessWidget {
     final isToday = DateUtils.isSameDay(day, DateTime.now());
     final dayStatus = status;
 
-    return InkWell(
-      customBorder: const CircleBorder(),
-      onTap: () => onTap(day),
-      child: Container(
-        margin: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: selected ? scheme.primary : null,
-          border: isToday && !selected ? Border.all(color: scheme.primary) : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '${day.day}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: selected ? scheme.onPrimary : null,
+    // Grid cells pass tight constraints; Center lets the 42px circle keep its size.
+    return Center(
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => onTap(day),
+        child: Container(
+          width: 42,
+          height: 42,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: selected ? scheme.primary : null,
+            border: isToday && !selected ? Border.all(color: scheme.primary) : null,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '${day.day}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: selected ? scheme.onPrimary : null,
+                ),
               ),
-            ),
-            Container(
-              width: 5,
-              height: 5,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: dayStatus == null
-                    ? Colors.transparent
-                    : selected
-                        ? scheme.onPrimary
-                        : dayStatus.statusColor(scheme),
+              Container(
+                width: 5,
+                height: 5,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: dayStatus == null
+                      ? Colors.transparent
+                      : selected
+                          ? scheme.onPrimary
+                          : dayStatus.statusColor(scheme),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -75,6 +75,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true, // cover the bottom nav bar
       backgroundColor: Colors.transparent,
       builder: (_) => const _AddCatSheet(),
     );

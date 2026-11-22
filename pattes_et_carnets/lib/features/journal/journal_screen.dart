@@ -117,6 +117,7 @@ class _AllJournalView extends ConsumerWidget {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true, // cover the bottom nav bar
       backgroundColor: Colors.transparent,
       builder: (_) => _EntrySheet(
         catId: entry?.catId ?? cats.first.id,
@@ -219,6 +220,7 @@ class _CatJournalView extends ConsumerWidget {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true, // cover the bottom nav bar
       backgroundColor: Colors.transparent,
       builder: (_) => _EntrySheet(
         catId: catId,
