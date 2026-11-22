@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:pattes_et_carnets/app/theme.dart';
 import 'package:pattes_et_carnets/shared/providers/data_providers.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/reminder_extensions.dart';
+import 'package:pattes_et_carnets/shared/services/phone.dart';
 
 class EmergencyScreen extends ConsumerWidget {
   const EmergencyScreen({super.key, required this.catId});
@@ -206,7 +206,7 @@ class _EmergencyContent extends ConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
-                      onPressed: () => _callVet(vet.phone),
+                      onPressed: () => callPhone(vet.phone),
                       icon: const Icon(Icons.call),
                       label: Text('APPELER ${vet.clinic ?? vet.name}'.toUpperCase()),
                       style: FilledButton.styleFrom(
@@ -256,13 +256,6 @@ class _EmergencyContent extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _callVet(String phone) async {
-    final uri = Uri.parse('tel:$phone');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
   }
 }
 

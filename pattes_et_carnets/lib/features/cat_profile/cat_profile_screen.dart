@@ -10,6 +10,7 @@ import 'package:pattes_et_carnets/shared/providers/data_providers.dart';
 import 'package:pattes_et_carnets/shared/database/app_database.dart';
 import 'package:pattes_et_carnets/shared/models/enums.dart';
 import 'package:pattes_et_carnets/shared/models/reminder_extensions.dart';
+import 'package:pattes_et_carnets/shared/services/phone.dart';
 
 // ---------------------------------------------------------------------------
 // Entry point
@@ -76,6 +77,8 @@ class _CatProfileView extends ConsumerWidget {
               delegate: SliverChildListDelegate([
                 _QuickStats(cat: cat),
                 const SizedBox(height: 28),
+                _InfoSection(cat: cat),
+                const SizedBox(height: 28),
                 _HealthSection(reminders: reminders),
                 const SizedBox(height: 28),
                 _RecentNotes(entries: entries, catId: cat.id),
@@ -117,7 +120,7 @@ class _HeroSliverAppBar extends ConsumerWidget {
         IconButton(
           icon: const Icon(Icons.edit_outlined),
           tooltip: 'Modifier',
-          onPressed: () => _showEditSheet(context),
+          onPressed: () => showEditCatSheet(context, cat),
         ),
         IconButton(
           icon: const Icon(Icons.crisis_alert),
@@ -147,14 +150,6 @@ class _HeroSliverAppBar extends ConsumerWidget {
     );
   }
 
-  void _showEditSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => EditCatSheet(cat: cat),
-    );
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -315,6 +310,155 @@ class _StatTile extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Medical info + vet
+// ---------------------------------------------------------------------------
+
+class _InfoSection extends ConsumerWidget {
+  const _InfoSection({required this.cat});
+
+  final Cat cat;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final vetId = cat.vetId;
+    final vet =
+        vetId == null ? null : ref.watch(vetByIdProvider(vetId)).valueOrNull;
+    final muted = theme.textTheme.bodyMedium
+        ?.copyWith(color: scheme.onSurfaceVariant, fontStyle: FontStyle.italic);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Informations', style: theme.textTheme.headlineMedium),
+            TextButton(
+              onPressed: () => showEditCatSheet(context, cat),
+              child: const Text('Modifier'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppTheme.cardSurface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [AppTheme.cardShadow],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _InfoRow(
+                icon: Icons.tag,
+                label: 'N° de puce',
+                value: cat.chipNumber ?? '—',
+              ),
+              _InfoRow(
+                icon: Icons.bloodtype_outlined,
+                label: 'Groupe sanguin',
+                value: cat.bloodType ?? '—',
+              ),
+              const Divider(height: 24),
+              Text('Allergies', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              if (cat.allergies.isEmpty)
+                Text('Aucune allergie connue', style: muted)
+              else
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (final a in cat.allergies)
+                      Chip(
+                        label: Text(a),
+                        backgroundColor: scheme.errorContainer,
+                        labelStyle: TextStyle(color: scheme.onErrorContainer),
+                        side: BorderSide.none,
+                      ),
+                  ],
+                ),
+              const Divider(height: 24),
+              Text('Vétérinaire', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              if (vet == null)
+                Text('Aucun vétérinaire renseigné', style: muted)
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(vet.name, style: theme.textTheme.bodyLarge),
+                          if (vet.clinic != null)
+                            Text(
+                              vet.clinic!,
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                          if (vet.phone.isNotEmpty)
+                            Text(
+                              vet.phone,
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (vet.phone.isNotEmpty)
+                      IconButton.filledTonal(
+                        icon: const Icon(Icons.phone),
+                        tooltip: 'Appeler',
+                        onPressed: () => callPhone(vet.phone),
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.icon, required this.label, required this.value});
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: scheme.primary),
+          const SizedBox(width: 12),
+          Text(label, style: theme.textTheme.bodyMedium
+              ?.copyWith(color: scheme.onSurfaceVariant)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: theme.textTheme.bodyLarge,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Health & Prevention section
 // ---------------------------------------------------------------------------
 
@@ -335,7 +479,9 @@ class _HealthSection extends StatelessWidget {
           children: [
             Text('Santé & Prévention', style: theme.textTheme.headlineMedium),
             TextButton(
-              onPressed: () => context.push('/calendar'),
+              // /calendar is a shell tab: push() would stack a second shell
+              // with the same navigator key and render a blank screen.
+              onPressed: () => context.go('/calendar'),
               child: const Text('Voir tout'),
             ),
           ],
@@ -580,13 +726,17 @@ class _NoteCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(
-                entry.note ?? entry.title,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
+              Text(entry.title, style: theme.textTheme.titleSmall),
+              if (entry.note != null && entry.note!.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  entry.note!,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 10),
               Text(
                 timeLabel,

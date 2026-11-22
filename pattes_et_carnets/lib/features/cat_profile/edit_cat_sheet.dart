@@ -24,6 +24,15 @@ Future<void> changeCatPhoto(BuildContext context, WidgetRef ref, int catId) asyn
   }
 }
 
+void showEditCatSheet(BuildContext context, Cat cat) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => EditCatSheet(cat: cat),
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Edit cat bottom sheet
 // ---------------------------------------------------------------------------
